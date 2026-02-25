@@ -35,7 +35,7 @@ export function EventCard({ event, participantCount }: EventCardProps) {
   });
 
   return (
-    <Link href={`/protected/events/${event.id}`}>
+    <Link href={`/events/${event.id}`}>
       <Card className="transition-shadow hover:shadow-md">
         <CardHeader className="flex flex-row items-start justify-between gap-2 pb-2">
           <CardTitle className="text-base font-semibold leading-snug">

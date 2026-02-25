@@ -19,7 +19,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
 
   // 비주최자 접근 차단
   if (role !== "host") {
-    redirect(`/protected/events/${id}`);
+    redirect(`/events/${id}`);
   }
 
   // event_date를 날짜/시간으로 분리

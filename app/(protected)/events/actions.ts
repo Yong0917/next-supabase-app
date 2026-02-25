@@ -59,7 +59,7 @@ export async function createEvent(
     return { error: "이벤트 생성에 실패했습니다. 다시 시도해주세요." };
   }
 
-  redirect(`/protected/events/${insertedEvent.id}`);
+  redirect(`/events/${insertedEvent.id}`);
 }
 
 // 이벤트 수정
@@ -112,7 +112,7 @@ export async function updateEvent(
     return { error: "이벤트 수정에 실패했습니다. 다시 시도해주세요." };
   }
 
-  redirect(`/protected/events/${eventId}`);
+  redirect(`/events/${eventId}`);
 }
 
 // 이벤트 취소
@@ -152,8 +152,8 @@ export async function cancelEvent(
     return { error: "이벤트 취소에 실패했습니다. 다시 시도해주세요." };
   }
 
-  revalidatePath(`/protected/events/${eventId}`);
-  revalidatePath("/protected/events");
+  revalidatePath(`/events/${eventId}`);
+  revalidatePath("/events");
 
   return { success: true };
 }

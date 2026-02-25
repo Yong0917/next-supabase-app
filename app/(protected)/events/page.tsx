@@ -31,7 +31,7 @@ async function EventsContent() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">내 이벤트</h1>
         <Button asChild>
-          <Link href="/protected/events/new">새 이벤트 만들기</Link>
+          <Link href="/events/new">새 이벤트 만들기</Link>
         </Button>
       </div>
 
@@ -52,7 +52,7 @@ async function EventsContent() {
             <div className="flex flex-col items-center gap-3 py-12 text-center text-muted-foreground">
               <p>주최한 이벤트가 없습니다.</p>
               <Button variant="outline" asChild>
-                <Link href="/protected/events/new">첫 이벤트 만들기</Link>
+                <Link href="/events/new">첫 이벤트 만들기</Link>
               </Button>
             </div>
           ) : (

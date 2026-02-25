@@ -63,7 +63,7 @@ export default async function EventDetailPage({
         {role === "host" && event.status === "active" && (
           <div className="flex shrink-0 gap-2">
             <Button variant="outline" asChild>
-              <Link href={`/protected/events/${event.id}/edit`}>수정</Link>
+              <Link href={`/events/${event.id}/edit`}>수정</Link>
             </Button>
             <CancelEventButton eventId={event.id} />
           </div>

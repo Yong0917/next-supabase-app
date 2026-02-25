@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { cancelEvent } from "@/app/protected/events/actions";
+import { cancelEvent } from "@/app/(protected)/events/actions";
 import {
   AlertDialog,
   AlertDialogAction,
