@@ -21,6 +21,18 @@ export default function ProtectedLayout({
               <div className="flex items-center gap-2">
                 <DeployButton />
               </div>
+              <Link
+                href="/protected/events"
+                className="text-sm font-medium hover:underline"
+              >
+                내 이벤트
+              </Link>
+              <Link
+                href="/protected/events/new"
+                className="text-sm font-medium hover:underline"
+              >
+                새 이벤트 만들기
+              </Link>
             </div>
             {!hasEnvVars ? (
               <EnvVarWarning />
