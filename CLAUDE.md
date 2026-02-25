@@ -77,7 +77,23 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 - 이메일/비밀번호 로그인: 클라이언트에서 `supabase.auth.signInWithPassword()` 호출
 - 이메일 OTP 확인: `app/auth/confirm/route.ts`에서 `verifyOtp()` 처리 후 리다이렉트
+- **Google OAuth**: `supabase.auth.signInWithOAuth({ provider: 'google' })` 호출
+  - 콜백: `app/auth/callback/route.ts`에서 `exchangeCodeForSession()` 처리
+  - 개발/프로덕션 환경 자동 분기 (x-forwarded-host 헤더 지원)
+  - 오픈 리다이렉트 방지 (`next` 파라미터 `/` 시작 여부 검증)
 - 세션 인증 확인: 서버 컴포넌트에서 `supabase.auth.getClaims()` 사용
+- 비밀번호 재설정: `app/auth/forgot-password` → 이메일 수신 → `app/auth/update-password`
+
+### Google OAuth 설정 (외부 작업 필요)
+
+코드 구현은 완료되어 있으나, 실제 동작을 위해 외부 설정 필요.
+상세 가이드: `TODO_google_oauth_setup.md` 참고.
+
+관련 코드:
+
+- `components/login-form.tsx` — `handleGoogleLogin()` (50번 줄)
+- `components/sign-up-form.tsx` — `handleGoogleSignUp()` (30번 줄)
+- `app/auth/callback/route.ts` — OAuth 콜백 Route Handler
 
 ### 데이터베이스 타입
 
@@ -97,13 +113,35 @@ npx shadcn@latest add <component-name>
 
 컴포넌트는 `components/ui/`에 생성됨. 아이콘 라이브러리는 `lucide-react`.
 
+현재 설치된 컴포넌트: `button`, `card`, `input`, `label`, `checkbox`, `badge`, `dropdown-menu`
+
 ### 라우트 구조
 
 - `/` — 홈 (공개)
-- `/auth/*` — 인증 관련 페이지 (공개)
+- `/auth/*` — 인증 관련 페이지 (공개, 미들웨어 예외)
+  - `/auth/login` — 이메일/비밀번호 + Google OAuth 로그인
+  - `/auth/sign-up` — 이메일/비밀번호 + Google OAuth 회원가입
+  - `/auth/sign-up-success` — 회원가입 이메일 확인 안내
+  - `/auth/confirm` — 이메일 OTP 확인 Route Handler
+  - `/auth/callback` — Google OAuth 콜백 Route Handler
+  - `/auth/forgot-password` — 비밀번호 찾기
+  - `/auth/update-password` — 비밀번호 재설정
+  - `/auth/error` — 인증 오류 페이지
 - `/protected` — 인증 필요 페이지 (미들웨어가 보호)
 
 새로운 보호 페이지는 `/protected` 하위에 추가하거나, 미들웨어 로직에서 패스를 추가.
+
+### 주요 컴포넌트
+
+| 파일                                  | 역할                                | 타입   |
+| ------------------------------------- | ----------------------------------- | ------ |
+| `components/login-form.tsx`           | 로그인 폼 (이메일 + Google OAuth)   | Client |
+| `components/sign-up-form.tsx`         | 회원가입 폼 (이메일 + Google OAuth) | Client |
+| `components/logout-button.tsx`        | 로그아웃 버튼                       | Client |
+| `components/auth-button.tsx`          | 인증 상태별 버튼 (네비게이션용)     | Server |
+| `components/forgot-password-form.tsx` | 비밀번호 찾기 폼                    | Client |
+| `components/update-password-form.tsx` | 비밀번호 재설정 폼                  | Client |
+| `components/theme-switcher.tsx`       | 다크/라이트/시스템 모드 전환        | Client |
 
 ### 테마
 
