@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { getMyHostedEvents, getMyParticipatingEvents } from "./actions";
 import { EventCard } from "@/components/events/event-card";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function EventsPage() {
+async function EventsContent() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
 
@@ -79,5 +80,13 @@ export default async function EventsPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function EventsPage() {
+  return (
+    <Suspense>
+      <EventsContent />
+    </Suspense>
   );
 }
