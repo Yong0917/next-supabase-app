@@ -3,3 +3,4 @@ node_modules/
 next-env.d.ts
 lib/types/database.ts
 package-lock.json
+shrimp_data/

@@ -1,0 +1,209 @@
+{
+  "tasks": [
+    {
+      "id": "3a627297-6ce1-4f32-a758-e5d34524409f",
+      "name": "npm 패키지 설치: react-hook-form, zod, @hookform/resolvers",
+      "description": "폼 관리 및 스키마 검증에 필요한 패키지 3개를 설치한다. react-hook-form 7.x, zod 최신, @hookform/resolvers 최신. 설치 후 package.json dependencies에 추가됨을 확인한다.",
+      "notes": "패키지 매니저는 npm 사용. yarn, pnpm, bun 사용 금지.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:09:20.830Z",
+      "relatedFiles": [
+        {
+          "path": "package.json",
+          "type": "TO_MODIFY",
+          "description": "의존성 추가 확인용"
+        },
+        {
+          "path": "package-lock.json",
+          "type": "TO_MODIFY",
+          "description": "락파일 업데이트"
+        }
+      ],
+      "implementationGuide": "터미널에서 실행: npm install react-hook-form zod @hookform/resolvers\n설치 완료 후 package.json에서 세 패키지가 dependencies에 추가되었는지 확인",
+      "verificationCriteria": "package.json의 dependencies에 react-hook-form, zod, @hookform/resolvers 3개 항목이 추가되어 있어야 함. node_modules에 해당 패키지 디렉토리 존재 확인.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "npm install react-hook-form zod @hookform/resolvers 설치 완료. package.json dependencies에 4개 패키지(zod 포함) 추가됨. 0 vulnerabilities.",
+      "completedAt": "2026-02-25T05:09:20.829Z"
+    },
+    {
+      "id": "8a31bef8-b73c-4c25-9232-85f3b5b7875b",
+      "name": "shadcn/ui 컴포넌트 설치: tabs, textarea, select, radio-group, alert-dialog, separator",
+      "description": "모임 매니저 UI에 필요한 shadcn/ui 컴포넌트 6개를 추가 설치한다. 현재 설치된 컴포넌트: button, card, input, label, checkbox, badge, dropdown-menu. 추가 설치: tabs(이벤트 목록 탭), textarea(공지/댓글 입력), select(참여 방식 선택), radio-group(참여 방식 라디오), alert-dialog(삭제 확인 다이얼로그), separator(구분선).",
+      "notes": "components.json 설정 확인: style=new-york, rsc=true, tsx=true, iconLibrary=lucide. 아이콘은 lucide-react만 사용.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:09:23.278Z",
+      "relatedFiles": [
+        {
+          "path": "components/ui/",
+          "type": "TO_MODIFY",
+          "description": "6개 신규 컴포넌트 생성 위치"
+        },
+        {
+          "path": "components.json",
+          "type": "REFERENCE",
+          "description": "shadcn/ui 설정 파일"
+        }
+      ],
+      "implementationGuide": "터미널에서 실행: npx shadcn@latest add tabs textarea select radio-group alert-dialog separator\n스타일은 components.json에 이미 new-york으로 설정됨. 프롬프트 응답 시 기본값 선택.\n설치 결과: components/ui/tabs.tsx, textarea.tsx, select.tsx, radio-group.tsx, alert-dialog.tsx, separator.tsx 생성",
+      "verificationCriteria": "components/ui/ 디렉토리에 tabs.tsx, textarea.tsx, select.tsx, radio-group.tsx, alert-dialog.tsx, separator.tsx 6개 파일이 존재해야 함.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "shadcn/ui 컴포넌트 6개 설치 완료: tabs.tsx, textarea.tsx, select.tsx, radio-group.tsx, separator.tsx, alert-dialog.tsx. button.tsx도 최신 버전으로 업데이트됨.",
+      "completedAt": "2026-02-25T05:09:23.275Z"
+    },
+    {
+      "id": "6eacbf6a-e0d2-48c3-9066-4b2d887f30c2",
+      "name": "Supabase DB: enum 타입 3개 생성",
+      "description": "모임 매니저에서 사용할 PostgreSQL enum 타입 3개를 Supabase SQL Editor에서 생성한다: event_status('active','cancelled','completed'), join_policy('open','approval'), participant_status('pending','approved','rejected','cancelled').",
+      "notes": "enum 생성 순서가 테이블 생성 전에 반드시 완료되어야 함. event_status에 completed 포함하지만 MVP에서는 active/cancelled만 사용.",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:09:25.657Z",
+      "relatedFiles": [],
+      "implementationGuide": "Supabase 대시보드 SQL Editor에서 아래 pseudocode에 해당하는 SQL 실행:\nCREATE TYPE public.event_status AS ENUM ('active', 'cancelled', 'completed');\nCREATE TYPE public.join_policy AS ENUM ('open', 'approval');\nCREATE TYPE public.participant_status AS ENUM ('pending', 'approved', 'rejected', 'cancelled');\n실행 후 Database > Types 메뉴에서 3개 enum 확인",
+      "verificationCriteria": "Supabase 대시보드 Database > Types(또는 SQL Editor에서 SELECT * FROM pg_type WHERE typcategory = 'E')에서 event_status, join_policy, participant_status 3개 enum 확인.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "Supabase DB에 enum 타입 3개 생성 완료: event_status('active','cancelled','completed'), join_policy('open','approval'), participant_status('pending','approved','rejected','cancelled'). SQL 쿼리로 3개 모두 확인됨.",
+      "completedAt": "2026-02-25T05:09:25.656Z"
+    },
+    {
+      "id": "9479a886-780b-4e46-a552-29c8972b8538",
+      "name": "Supabase DB: events 및 event_participants 테이블 생성",
+      "description": "이벤트 핵심 테이블 2개를 생성한다.\nevents 테이블: id(uuid PK default gen_random_uuid()), host_id(uuid NOT NULL FK→auth.users(id) ON DELETE CASCADE), title(text NOT NULL), description(text), event_date(timestamptz NOT NULL), location(text), max_capacity(int), join_policy(join_policy NOT NULL default 'open'), invite_code(text NOT NULL UNIQUE), status(event_status NOT NULL default 'active'), created_at(timestamptz default now()), updated_at(timestamptz default now()).\nevent_participants 테이블: id(uuid PK), event_id(uuid NOT NULL FK→events(id) ON DELETE CASCADE), user_id(uuid NOT NULL FK→auth.users(id) ON DELETE CASCADE), status(participant_status NOT NULL default 'pending'), joined_at(timestamptz default now()), UNIQUE(event_id, user_id).",
+      "notes": "enum 타입 생성 태스크가 완료된 후 실행해야 함. invite_code는 8자리 고유 코드 — DB 레벨에서 UNIQUE만 설정, 실제 생성은 Phase 1 서버 액션에서 처리.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "6eacbf6a-e0d2-48c3-9066-4b2d887f30c2"
+        }
+      ],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:09:46.326Z",
+      "relatedFiles": [],
+      "implementationGuide": "Supabase SQL Editor에서 events 테이블 먼저 생성 후 event_participants 생성(FK 의존성):\n1. CREATE TABLE public.events (...) with all fields\n2. CREATE TABLE public.event_participants (...) with FK to events\n3. UNIQUE 제약: ALTER TABLE public.event_participants ADD CONSTRAINT event_participants_event_id_user_id_key UNIQUE (event_id, user_id)\n4. events 테이블에 host_id 인덱스 생성: CREATE INDEX idx_events_host_id ON public.events(host_id)\n5. event_participants에 인덱스: CREATE INDEX idx_event_participants_event_id ON public.event_participants(event_id)",
+      "verificationCriteria": "Supabase 대시보드 Table Editor에서 events, event_participants 테이블 확인. event_participants에 (event_id, user_id) UNIQUE 제약 존재 확인.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "events, event_participants 테이블 생성 완료. events: uuid PK, host_id FK(auth.users CASCADE), join_policy enum, invite_code UNIQUE, status enum. event_participants: (event_id, user_id) UNIQUE 제약, participant_status enum default 'pending'. 인덱스 4개(host_id, invite_code, event_id, user_id) 생성.",
+      "completedAt": "2026-02-25T05:09:46.325Z"
+    },
+    {
+      "id": "f2cf0d95-00fa-45d3-a8a4-4e95d2e400d9",
+      "name": "Supabase DB: announcements 및 announcement_comments 테이블 생성",
+      "description": "공지 및 댓글 테이블 2개를 생성한다.\nannouncements 테이블: id(uuid PK default gen_random_uuid()), event_id(uuid NOT NULL FK→events(id) ON DELETE CASCADE), author_id(uuid NOT NULL FK→auth.users(id) ON DELETE CASCADE), title(text NOT NULL), content(text NOT NULL), created_at(timestamptz default now()), updated_at(timestamptz default now()).\nannouncement_comments 테이블: id(uuid PK default gen_random_uuid()), announcement_id(uuid NOT NULL FK→announcements(id) ON DELETE CASCADE), author_id(uuid NOT NULL FK→auth.users(id) ON DELETE CASCADE), content(text NOT NULL), created_at(timestamptz default now()).",
+      "notes": "announcement_comments의 announcement_id FK에 ON DELETE CASCADE 적용 — 공지 삭제 시 댓글 자동 삭제. events 테이블 생성 태스크 완료 후 실행.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "9479a886-780b-4e46-a552-29c8972b8538"
+        }
+      ],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:10:03.604Z",
+      "relatedFiles": [],
+      "implementationGuide": "Supabase SQL Editor에서:\n1. CREATE TABLE public.announcements (...)\n2. CREATE TABLE public.announcement_comments (...) with ON DELETE CASCADE for announcement_id\n3. 인덱스: CREATE INDEX idx_announcements_event_id ON public.announcements(event_id)\n4. 인덱스: CREATE INDEX idx_announcement_comments_announcement_id ON public.announcement_comments(announcement_id)\nannouncement_comments에는 updated_at 불필요(댓글 수정 기능 없음)",
+      "verificationCriteria": "Supabase Table Editor에서 announcements, announcement_comments 테이블 확인. announcements.event_id와 announcement_comments.announcement_id에 ON DELETE CASCADE 설정 확인.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "announcements, announcement_comments 테이블 생성 완료. announcements: event_id FK(events CASCADE), author_id FK(auth.users CASCADE). announcement_comments: announcement_id FK(announcements ON DELETE CASCADE) 적용으로 공지 삭제 시 댓글 자동 삭제. 인덱스 2개 생성.",
+      "completedAt": "2026-02-25T05:10:03.602Z"
+    },
+    {
+      "id": "22cb6e4d-03be-45a2-8d65-1bc3909cba1c",
+      "name": "Supabase DB: updated_at 트리거 및 RLS 정책 적용",
+      "description": "4개 테이블에 updated_at 자동 갱신 트리거를 적용하고, 모든 테이블에 RLS를 활성화하여 정책을 설정한다.\n트리거 대상: events, event_participants, announcements (announcement_comments는 updated_at 컬럼 없음)\nRLS 정책:\n- events: SELECT(인증 사용자 전체), INSERT(auth.uid() IS NOT NULL), UPDATE(auth.uid()=host_id), DELETE(auth.uid()=host_id)\n- event_participants: SELECT(본인 또는 주최자), INSERT(auth.uid()=user_id), UPDATE(주최자만), DELETE(auth.uid()=user_id)\n- announcements: SELECT(주최자 또는 approved 참여자), INSERT/UPDATE/DELETE(이벤트 주최자만)\n- announcement_comments: SELECT(주최자 또는 approved 참여자), INSERT(주최자 또는 approved 참여자), DELETE(auth.uid()=author_id)",
+      "notes": "모든 DB 함수에 SET search_path = '' 적용 필수(보안). event_participants의 SELECT 정책에서 주최자 확인 시 서브쿼리 사용. profiles 테이블의 기존 트리거 함수 패턴 참고.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "f2cf0d95-00fa-45d3-a8a4-4e95d2e400d9"
+        }
+      ],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:10:54.513Z",
+      "relatedFiles": [],
+      "implementationGuide": "Supabase SQL Editor에서:\n1. updated_at 트리거 함수 생성(또는 기존 함수 재활용):\nCREATE OR REPLACE FUNCTION public.handle_updated_at()\nRETURNS trigger\nLANGUAGE plpgsql\nSECURITY DEFINER\nSET search_path = ''\nAS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;\n\n2. 트리거 3개 생성(events, event_participants, announcements)\n\n3. RLS 활성화: ALTER TABLE public.events ENABLE ROW LEVEL SECURITY; (4개 테이블 모두)\n\n4. events RLS 4개 정책 생성\n5. event_participants RLS 4개 정책 생성\n6. announcements RLS 정책 생성\n7. announcement_comments RLS 정책 생성\n\nannouncements/announcement_comments SELECT 정책의 approved 참여자 체크:\nEXISTS (SELECT 1 FROM public.event_participants ep WHERE ep.event_id = [event_id] AND ep.user_id = auth.uid() AND ep.status = 'approved')\nOR (SELECT host_id FROM public.events WHERE id = [event_id]) = auth.uid()",
+      "verificationCriteria": "Supabase Dashboard > Authentication > Policies에서 4개 테이블의 RLS 정책 확인. SQL Editor에서 각 테이블에 authenticated 사용자로 SELECT 쿼리 실행 시 RLS 필터 적용됨을 확인.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "updated_at 트리거(events, announcements) 및 RLS 정책 적용 완료. handle_updated_at 함수에 SECURITY DEFINER + SET search_path='' 보안 설정 적용. events(4), event_participants(4), announcements(4), announcement_comments(3) 총 15개 RLS 정책 생성. approved 참여자 접근 제어는 EXISTS 서브쿼리로 구현.",
+      "completedAt": "2026-02-25T05:10:54.512Z"
+    },
+    {
+      "id": "b293cdc7-a706-46bd-9954-86e839373877",
+      "name": "Supabase 타입 재생성 및 lib/types/index.ts 편의 타입 추가",
+      "description": "DB 스키마 변경 후 Supabase CLI로 TypeScript 타입을 재생성하고, lib/types/index.ts에 신규 테이블 편의 타입을 추가한다.\n추가할 타입: Event, EventInsert, EventUpdate, EventParticipant, EventParticipantInsert, EventParticipantUpdate, Announcement, AnnouncementInsert, AnnouncementUpdate, AnnouncementComment, AnnouncementCommentInsert.",
+      "notes": "database.ts는 직접 수정 금지 — CLI로만 재생성. index.ts 수정 후 npm run validate 실행하여 타입 오류 없음 확인. .prettierignore에 database.ts가 이미 포함되어 있으므로 Prettier 제외됨.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "22cb6e4d-03be-45a2-8d65-1bc3909cba1c"
+        }
+      ],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:11:46.470Z",
+      "relatedFiles": [
+        {
+          "path": "lib/types/database.ts",
+          "type": "TO_MODIFY",
+          "description": "Supabase CLI로 재생성 — 직접 수정 금지"
+        },
+        {
+          "path": "lib/types/index.ts",
+          "type": "TO_MODIFY",
+          "description": "신규 편의 타입 추가",
+          "lineStart": 1,
+          "lineEnd": 11
+        }
+      ],
+      "implementationGuide": "1. Supabase project-id 확인 후 실행:\nnpx supabase gen types typescript --project-id <project-id> > lib/types/database.ts\n\n2. lib/types/index.ts 수정 — 기존 Profile 타입 유지, 아래 타입 추가:\nexport type Event = Database[\"public\"][\"Tables\"][\"events\"][\"Row\"];\nexport type EventInsert = Database[\"public\"][\"Tables\"][\"events\"][\"Insert\"];\nexport type EventUpdate = Database[\"public\"][\"Tables\"][\"events\"][\"Update\"];\nexport type EventParticipant = Database[\"public\"][\"Tables\"][\"event_participants\"][\"Row\"];\nexport type EventParticipantInsert = Database[\"public\"][\"Tables\"][\"event_participants\"][\"Insert\"];\nexport type EventParticipantUpdate = Database[\"public\"][\"Tables\"][\"event_participants\"][\"Update\"];\nexport type Announcement = Database[\"public\"][\"Tables\"][\"announcements\"][\"Row\"];\nexport type AnnouncementInsert = Database[\"public\"][\"Tables\"][\"announcements\"][\"Insert\"];\nexport type AnnouncementUpdate = Database[\"public\"][\"Tables\"][\"announcements\"][\"Update\"];\nexport type AnnouncementComment = Database[\"public\"][\"Tables\"][\"announcement_comments\"][\"Row\"];\nexport type AnnouncementCommentInsert = Database[\"public\"][\"Tables\"][\"announcement_comments\"][\"Insert\"];\n\n3. enum 타입도 re-export:\nexport type EventStatus = Database[\"public\"][\"Enums\"][\"event_status\"];\nexport type JoinPolicy = Database[\"public\"][\"Enums\"][\"join_policy\"];\nexport type ParticipantStatus = Database[\"public\"][\"Enums\"][\"participant_status\"];",
+      "verificationCriteria": "lib/types/database.ts에 events, event_participants, announcements, announcement_comments 테이블 타입과 event_status, join_policy, participant_status enum 타입이 존재. lib/types/index.ts에서 Event, EventParticipant, Announcement, AnnouncementComment 등 신규 타입이 import 가능.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "database.ts 재생성 완료 — events, event_participants, announcements, announcement_comments 4개 테이블 타입 + event_status/join_policy/participant_status enum 타입 포함. index.ts에 Event, EventInsert, EventUpdate, EventParticipant, Announcement, AnnouncementComment 등 14개 편의 타입 및 enum 타입 3개 추가.",
+      "completedAt": "2026-02-25T05:11:46.467Z"
+    },
+    {
+      "id": "6e4bed9a-3648-48a6-b532-66bcfd909829",
+      "name": "npm run validate 통과 확인",
+      "description": "Phase 0 완료 기준인 npm run validate(type-check + lint + format:check)를 실행하여 타입 오류 0건, ESLint 오류 0건, Prettier 포맷 통과를 확인한다.",
+      "notes": "database.ts는 .prettierignore에 포함되어 Prettier 검사 제외됨. shadcn/ui 컴포넌트(components/ui/)는 ESLint no-explicit-any 규칙 완화됨.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "b293cdc7-a706-46bd-9954-86e839373877"
+        },
+        {
+          "taskId": "3a627297-6ce1-4f32-a758-e5d34524409f"
+        },
+        {
+          "taskId": "8a31bef8-b73c-4c25-9232-85f3b5b7875b"
+        }
+      ],
+      "createdAt": "2026-02-25T05:07:26.225Z",
+      "updatedAt": "2026-02-25T05:12:14.997Z",
+      "relatedFiles": [
+        {
+          "path": "package.json",
+          "type": "REFERENCE",
+          "description": "validate 스크립트 확인"
+        },
+        {
+          "path": "lib/types/index.ts",
+          "type": "REFERENCE",
+          "description": "타입 오류 디버깅용"
+        },
+        {
+          "path": "tsconfig.json",
+          "type": "REFERENCE",
+          "description": "TypeScript 설정"
+        }
+      ],
+      "implementationGuide": "터미널에서 실행: npm run validate\n오류 발생 시:\n- TypeScript 오류: lib/types/index.ts의 타입 경로 확인\n- ESLint 오류: npm run lint:fix로 자동 수정\n- Prettier 오류: npm run format으로 자동 포맷 후 재확인",
+      "verificationCriteria": "npm run validate 실행 결과 오류 없이 통과. 출력에 TypeScript 컴파일 오류 0건, ESLint 오류 0건, Prettier 포맷 불일치 0건.",
+      "analysisResult": "Phase 0 목표: 모임 매니저 MVP 신규 기능 개발을 위한 기반 구축. npm 패키지 설치, shadcn/ui 컴포넌트 추가, Supabase DB 스키마 생성(enum 3개 + 테이블 4개 + 트리거 + RLS), TypeScript 타입 체계 구축. 완료 기준: npm run validate 통과, Supabase 4개 테이블 및 RLS 확인, lib/types/index.ts에서 신규 타입 임포트 가능. 스택: Next.js 15 App Router + Supabase + Tailwind CSS v3 + shadcn/ui(new-york) + TypeScript + npm. 패키지 매니저: npm. 금지: DB 트리거로 비즈니스 로직 처리 금지(open 자동 승인은 Phase 1 서버 액션에서 처리), database.ts 직접 수정 금지, 서버 클라이언트 전역 변수 저장 금지.",
+      "summary": "npm run validate 통과 완료. TypeScript 컴파일 오류 0건, ESLint 오류 0건, Prettier 포맷 통과. shadcn/ui 신규 컴포넌트 및 lib/types/index.ts Prettier 자동 포맷 적용 후 All matched files use Prettier code style 확인.",
+      "completedAt": "2026-02-25T05:12:14.983Z"
+    }
+  ]
+}

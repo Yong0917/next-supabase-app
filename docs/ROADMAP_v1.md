@@ -1,7 +1,7 @@
 # 모임 매니저 MVP 개발 로드맵
 
 > 마지막 업데이트: 2026-02-25
-> 버전: v1.1
+> 버전: v1.2
 
 ## 프로젝트 개요
 
@@ -82,7 +82,7 @@ npx shadcn@latest add separator  # 구분선
 
 ---
 
-### Phase 1: 이벤트 CRUD (1.5주)
+### Phase 1: 이벤트 CRUD (1.5주) ✅ 완료
 
 **목표**: 주최자가 이벤트를 생성하고, 목록 조회 및 상세 확인, 수정/취소까지 가능한 핵심 CRUD 구현
 **완료 기준**:
@@ -97,26 +97,26 @@ npx shadcn@latest add separator  # 구분선
 
 **서버 액션 (app/protected/events/actions.ts)**
 
-- [ ] `createEvent` Server Action 구현 (Zod 검증, 8자리 고유 invite_code 생성, Supabase INSERT) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [ ] `updateEvent` Server Action 구현 (host_id 검증, Supabase UPDATE) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `cancelEvent` Server Action 구현 (status를 `cancelled`로 변경) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `getMyHostedEvents` 쿼리 함수 구현 (host_id = 본인, 상태 포함) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `getMyParticipatingEvents` 쿼리 함수 구현 (event_participants join events, 본인 참여 이벤트) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `getEventById` 쿼리 함수 구현 (이벤트 상세 + 현재 사용자 역할/참여 상태 포함) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `createEvent` Server Action 구현 (Zod 검증, 8자리 고유 invite_code 생성, Supabase INSERT) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `updateEvent` Server Action 구현 (host_id 검증, Supabase UPDATE) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `cancelEvent` Server Action 구현 (status를 `cancelled`로 변경) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `getMyHostedEvents` 쿼리 함수 구현 (host_id = 본인, 상태 포함) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `getMyParticipatingEvents` 쿼리 함수 구현 (event_participants join events, 본인 참여 이벤트) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `getEventById` 쿼리 함수 구현 (이벤트 상세 + 현재 사용자 역할/참여 상태 포함) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
 
 **공통 컴포넌트**
 
-- [ ] `components/events/event-form.tsx` 구현 (React Hook Form + Zod, 생성/수정 공용, 제목/설명/날짜/시간/장소/최대인원/참여방식 필드) | 담당: 프론트엔드 | 예상: 2d | 우선순위: 높음
-- [ ] `components/events/event-card.tsx` 구현 (제목, 날짜, 장소, 승인인원/최대인원, 상태 배지) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
-- [ ] `components/events/invite-code-display.tsx` 구현 (초대 코드 복사 버튼, 클립보드 API 활용) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
+- [x] `components/events/event-form.tsx` 구현 (React Hook Form + Zod, 생성/수정 공용, 제목/설명/날짜/시간/장소/최대인원/참여방식 필드) | 담당: 프론트엔드 | 예상: 2d | 우선순위: 높음
+- [x] `components/events/event-card.tsx` 구현 (제목, 날짜, 장소, 승인인원/최대인원, 상태 배지) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
+- [x] `components/events/invite-code-display.tsx` 구현 (초대 코드 복사 버튼, 클립보드 API 활용) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
 
 **페이지**
 
-- [ ] `app/protected/events/page.tsx` 구현 (내 이벤트 목록, 주최/참여 탭, 새 이벤트 만들기 버튼) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [ ] `app/protected/events/new/page.tsx` 구현 (이벤트 생성 폼 페이지, createEvent 액션 연결) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `app/protected/events/[id]/page.tsx` 구현 (이벤트 상세, 역할 기반 조건부 UI: 주최자/승인참여자/대기참여자) | 담당: 풀스택 | 예상: 2d | 우선순위: 높음
-- [ ] `app/protected/events/[id]/edit/page.tsx` 구현 (기존 데이터 prefill, 비주최자 403 처리) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [ ] `app/protected/layout.tsx` 네비게이션 업데이트 (내 이벤트 목록 링크, 새 이벤트 만들기 링크 추가) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
+- [x] `app/protected/events/page.tsx` 구현 (내 이벤트 목록, 주최/참여 탭, 새 이벤트 만들기 버튼) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `app/protected/events/new/page.tsx` 구현 (이벤트 생성 폼 페이지, createEvent 액션 연결) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `app/protected/events/[id]/page.tsx` 구현 (이벤트 상세, 역할 기반 조건부 UI: 주최자/승인참여자/대기참여자) | 담당: 풀스택 | 예상: 2d | 우선순위: 높음
+- [x] `app/protected/events/[id]/edit/page.tsx` 구현 (기존 데이터 prefill, 비주최자 403 처리) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `app/protected/layout.tsx` 네비게이션 업데이트 (내 이벤트 목록 링크, 새 이벤트 만들기 링크 추가) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
 
 ---
 
@@ -379,7 +379,8 @@ lib/
 
 ## 변경 이력
 
-| 버전 | 날짜       | 변경 내용                                                |
-| ---- | ---------- | -------------------------------------------------------- |
-| v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축) |
-| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반)                                  |
+| 버전 | 날짜       | 변경 내용                                                    |
+| ---- | ---------- | ------------------------------------------------------------ |
+| v1.2 | 2026-02-25 | Phase 1 완료 처리 (이벤트 CRUD, 서버 액션, 컴포넌트, 페이지) |
+| v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축)     |
+| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반)                                      |
