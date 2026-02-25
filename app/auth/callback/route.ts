@@ -6,10 +6,10 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  // 로그인 성공 후 이동할 경로 (기본값: /protected)
-  const next = searchParams.get("next") ?? "/protected";
+  // 로그인 성공 후 이동할 경로 (기본값: /events)
+  const next = searchParams.get("next") ?? "/events";
   // 오픈 리다이렉트 방지: /로 시작하는 경로만 허용
-  const safePath = next.startsWith("/") ? next : "/protected";
+  const safePath = next.startsWith("/") ? next : "/events";
 
   if (code) {
     const supabase = await createClient();
