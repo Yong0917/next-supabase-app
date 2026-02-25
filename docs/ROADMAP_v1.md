@@ -1,7 +1,7 @@
 # 모임 매니저 MVP 개발 로드맵
 
 > 마지막 업데이트: 2026-02-25
-> 버전: v1.0
+> 버전: v1.1
 
 ## 프로젝트 개요
 
@@ -54,7 +54,7 @@ npx shadcn@latest add separator  # 구분선
 
 ## 개발 로드맵
 
-### Phase 0: 프로젝트 셋업 (1주)
+### Phase 0: 프로젝트 셋업 (1주) ✅ 완료
 
 **목표**: 신규 기능 개발을 위한 의존성 설치, DB 마이그레이션 준비, 타입 체계 구축
 **완료 기준**:
@@ -65,20 +65,20 @@ npx shadcn@latest add separator  # 구분선
 
 #### 태스크
 
-- [ ] react-hook-form, zod, @hookform/resolvers npm 설치 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] shadcn/ui 추가 컴포넌트 설치 (tabs, textarea, select, radio-group, alert-dialog, separator) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] Supabase에서 enum 타입 3개 생성 (`event_status`, `join_policy`, `participant_status`) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] `events` 테이블 생성 (host_id FK, invite_code unique, 전체 필드) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] `event_participants` 테이블 생성 (event_id FK, user_id FK, status enum) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] `announcements` 테이블 생성 (event_id FK, author_id FK) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] `announcement_comments` 테이블 생성 (announcement_id FK, author_id FK) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] 4개 테이블에 `updated_at` 자동 갱신 트리거 적용 | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] `events` 및 `event_participants` RLS 정책 적용 (SELECT/INSERT/UPDATE/DELETE 전체) | 담당: 백엔드 | 예상: 1d | 우선순위: 높음
-- [ ] `announcements` 및 `announcement_comments` RLS 정책 적용 (approved 참여자 접근 제어 포함) | 담당: 백엔드 | 예상: 1d | 우선순위: 높음
-- [ ] `open` 정책 이벤트 참여 신청 시 자동 승인 트리거 구현 (`join_policy = 'open'` 이면 INSERT 후 status를 `approved`로 자동 변경) | 담당: 백엔드 | 예상: 1d | 우선순위: 높음
-- [ ] `npx supabase gen types typescript` 실행 후 `lib/types/database.ts` 업데이트 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `lib/types/index.ts`에 신규 테이블 편의 타입 추가 (Event, EventInsert, EventParticipant, Announcement, AnnouncementComment 등) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `npm run validate` 실행하여 타입/린트 오류 없음 확인 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] react-hook-form, zod, @hookform/resolvers npm 설치 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] shadcn/ui 추가 컴포넌트 설치 (tabs, textarea, select, radio-group, alert-dialog, separator) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] Supabase에서 enum 타입 3개 생성 (`event_status`, `join_policy`, `participant_status`) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `events` 테이블 생성 (host_id FK, invite_code unique, 전체 필드) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `event_participants` 테이블 생성 (event_id FK, user_id FK, status enum) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `announcements` 테이블 생성 (event_id FK, author_id FK) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `announcement_comments` 테이블 생성 (announcement_id FK, author_id FK) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] 4개 테이블에 `updated_at` 자동 갱신 트리거 적용 | 담당: 백엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `events` 및 `event_participants` RLS 정책 적용 (SELECT/INSERT/UPDATE/DELETE 전체) | 담당: 백엔드 | 예상: 1d | 우선순위: 높음
+- [x] `announcements` 및 `announcement_comments` RLS 정책 적용 (approved 참여자 접근 제어 포함) | 담당: 백엔드 | 예상: 1d | 우선순위: 높음
+- [x] `open` 정책 이벤트 참여 신청 시 자동 승인 트리거 구현 (`join_policy = 'open'` 이면 INSERT 후 status를 `approved`로 자동 변경) | 담당: 백엔드 | 예상: 1d | 우선순위: 높음
+- [x] `npx supabase gen types typescript` 실행 후 `lib/types/database.ts` 업데이트 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `lib/types/index.ts`에 신규 테이블 편의 타입 추가 (Event, EventInsert, EventParticipant, Announcement, AnnouncementComment 등) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `npm run validate` 실행하여 타입/린트 오류 없음 확인 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
 
 ---
 
@@ -379,6 +379,7 @@ lib/
 
 ## 변경 이력
 
-| 버전 | 날짜       | 변경 내용               |
-| ---- | ---------- | ----------------------- |
-| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반) |
+| 버전 | 날짜       | 변경 내용                                                |
+| ---- | ---------- | -------------------------------------------------------- |
+| v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축) |
+| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반)                                  |
