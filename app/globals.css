@@ -4,101 +4,101 @@
 
 @layer base {
   :root {
-    /* 배경: 거의 흰색에 보랏빛이 살짝 도는 색 */
-    --background: 250 100% 99%;
-    --foreground: 240 10% 10%;
+    /* 배경: 따뜻한 크림 페이퍼 */
+    --background: 38 30% 97%;
+    --foreground: 220 25% 18%;
 
     /* 카드: 순수 흰색 */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card-foreground: 220 25% 18%;
 
     /* 팝오버 */
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover-foreground: 220 25% 18%;
 
-    /* Primary: indigo-500 계열 */
-    --primary: 243 75% 59%;
+    /* Primary: 따뜻한 앰버 */
+    --primary: 28 88% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: 연한 보라빛 */
-    --secondary: 270 30% 95%;
-    --secondary-foreground: 243 75% 40%;
+    /* Secondary: 연한 크림 */
+    --secondary: 38 40% 92%;
+    --secondary-foreground: 220 25% 28%;
 
     /* Muted */
-    --muted: 240 20% 96%;
-    --muted-foreground: 240 5% 45%;
+    --muted: 38 20% 93%;
+    --muted-foreground: 220 10% 50%;
 
     /* Accent */
-    --accent: 270 50% 93%;
-    --accent-foreground: 243 75% 40%;
+    --accent: 38 50% 90%;
+    --accent-foreground: 28 88% 38%;
 
     /* Destructive */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
     /* Border / Input */
-    --border: 240 20% 90%;
-    --input: 240 20% 90%;
+    --border: 35 25% 87%;
+    --input: 35 25% 87%;
 
-    /* Ring: primary 색상과 동일 */
-    --ring: 243 75% 59%;
+    /* Ring */
+    --ring: 28 88% 50%;
 
     /* 차트 컬러 */
-    --chart-1: 243 75% 59%;
-    --chart-2: 270 60% 55%;
-    --chart-3: 295 50% 50%;
-    --chart-4: 220 70% 55%;
-    --chart-5: 310 65% 55%;
+    --chart-1: 28 88% 50%;
+    --chart-2: 152 55% 40%;
+    --chart-3: 200 70% 45%;
+    --chart-4: 280 60% 50%;
+    --chart-5: 340 70% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
   }
 
   .dark {
-    /* 배경: 짙은 인디고-퍼플 계열 다크 */
-    --background: 240 15% 9%;
-    --foreground: 240 10% 95%;
+    /* 배경: 깊은 네이비 */
+    --background: 220 35% 8%;
+    --foreground: 38 20% 92%;
 
     /* 카드 */
-    --card: 240 12% 12%;
-    --card-foreground: 240 10% 95%;
+    --card: 220 30% 12%;
+    --card-foreground: 38 20% 92%;
 
     /* 팝오버 */
-    --popover: 240 12% 12%;
-    --popover-foreground: 240 10% 95%;
+    --popover: 220 30% 12%;
+    --popover-foreground: 38 20% 92%;
 
-    /* Primary: 다크 모드에서 밝게 */
-    --primary: 243 75% 65%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: 황금 앰버 */
+    --primary: 38 90% 58%;
+    --primary-foreground: 220 35% 8%;
 
     /* Secondary */
-    --secondary: 240 15% 16%;
-    --secondary-foreground: 243 75% 75%;
+    --secondary: 220 25% 17%;
+    --secondary-foreground: 38 90% 75%;
 
     /* Muted */
-    --muted: 240 10% 15%;
-    --muted-foreground: 240 5% 55%;
+    --muted: 220 20% 15%;
+    --muted-foreground: 220 10% 55%;
 
     /* Accent */
-    --accent: 240 15% 18%;
-    --accent-foreground: 243 75% 75%;
+    --accent: 220 25% 19%;
+    --accent-foreground: 38 90% 70%;
 
     /* Destructive */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
     /* Border / Input */
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
 
     /* Ring */
-    --ring: 243 75% 65%;
+    --ring: 38 90% 58%;
 
     /* 차트 컬러 */
-    --chart-1: 220 70% 50%;
-    --chart-2: 270 60% 55%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --chart-1: 38 90% 58%;
+    --chart-2: 152 55% 45%;
+    --chart-3: 200 70% 50%;
+    --chart-4: 280 60% 55%;
+    --chart-5: 340 70% 55%;
   }
 }
 

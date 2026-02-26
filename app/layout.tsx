@@ -44,11 +44,11 @@ export default function RootLayout({
             <div className="mx-auto flex h-14 max-w-screen-sm items-center justify-between px-4">
               {/* 앱 로고 */}
               <Link href="/" className="flex items-center gap-2">
-                {/* 로고 아이콘: indigo → purple 그라디언트 배경 */}
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-sm">
+                {/* 로고 아이콘: 앰버 그라디언트 */}
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-sm">
                   <CalendarDays size={15} />
                 </div>
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-base font-bold tracking-tight text-transparent">
+                <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-base font-bold tracking-tight text-transparent">
                   모임
                 </span>
               </Link>
@@ -94,8 +94,8 @@ export default function RootLayout({
                 className="flex flex-col items-center gap-1 px-6 py-2"
                 aria-label="새 이벤트 만들기"
               >
-                {/* 새 이벤트 버튼: indigo → purple 그라디언트 */}
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md transition-transform active:scale-95">
+                {/* 새 이벤트 버튼: 앰버 그라디언트 */}
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-md transition-transform active:scale-95">
                   <CalendarPlus size={20} />
                 </div>
               </Link>
