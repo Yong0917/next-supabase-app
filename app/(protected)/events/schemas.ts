@@ -19,6 +19,8 @@ export const EventFormSchema = z.object({
   join_policy: z.enum(["open", "approval"], {
     error: "참여 방식을 선택해주세요.",
   }),
+  // 커버 이미지 URL (업로드 후 Storage에서 반환된 공개 URL)
+  cover_image_url: z.string().url().optional().nullable(),
 });
 
 export type EventFormValues = z.infer<typeof EventFormSchema>;

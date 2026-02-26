@@ -12,10 +12,17 @@ export default async function NewEventPage() {
     redirect("/auth/login");
   }
 
+  // 이미지 업로드 경로 생성에 사용할 사용자 ID
+  const userId = data.claims.sub;
+
   return (
     <div className="mx-auto w-full max-w-xl">
       <h1 className="mb-6 text-2xl font-bold">새 이벤트 만들기</h1>
-      <EventForm action={createEvent} submitLabel="이벤트 만들기" />
+      <EventForm
+        action={createEvent}
+        submitLabel="이벤트 만들기"
+        userId={userId}
+      />
     </div>
   );
 }

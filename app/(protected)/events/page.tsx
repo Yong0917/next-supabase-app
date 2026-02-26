@@ -73,7 +73,7 @@ async function EventsContent() {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {participatingEvents.map((item) => (
-                <EventCard key={item.event_id} event={item.events} />
+                <EventCard key={item.event_id} event={item.event} />
               ))}
             </div>
           )}

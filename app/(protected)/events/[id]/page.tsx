@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -52,6 +53,20 @@ export default async function EventDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
+      {/* 커버 이미지 (있을 경우에만 표시) */}
+      {event.cover_image_url && (
+        <div className="relative h-56 w-full overflow-hidden rounded-lg">
+          <Image
+            src={event.cover_image_url}
+            alt={`${event.title} 커버 이미지`}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 672px"
+            priority
+          />
+        </div>
+      )}
+
       {/* 헤더 */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { getEventById, updateEvent } from "../../actions";
 import { EventForm } from "@/components/events/event-form";
+import { createClient } from "@/lib/supabase/server";
 
 interface EditEventPageProps {
   params: Promise<{ id: string }>;
@@ -9,6 +10,16 @@ interface EditEventPageProps {
 
 export default async function EditEventPage({ params }: EditEventPageProps) {
   const { id } = await params;
+
+  // 사용자 ID 조회 (이미지 업로드 경로 생성에 사용)
+  const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !authData?.claims) {
+    redirect("/auth/login");
+  }
+
+  const userId = authData.claims.sub;
   const result = await getEventById(id);
 
   if ("error" in result) {
@@ -36,6 +47,7 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
       <EventForm
         action={updateEventWithId}
         submitLabel="수정 완료"
+        userId={userId}
         defaultValues={{
           title: event.title,
           description: event.description ?? undefined,
@@ -44,6 +56,8 @@ export default async function EditEventPage({ params }: EditEventPageProps) {
           location: event.location ?? undefined,
           max_capacity: event.max_capacity ?? undefined,
           join_policy: event.join_policy,
+          // 기존 커버 이미지 URL (수정 시 미리보기로 표시)
+          cover_image_url: event.cover_image_url ?? null,
         }}
       />
     </div>

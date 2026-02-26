@@ -31,7 +31,8 @@ export async function createEvent(
     return { error: validated.error.issues[0].message };
   }
 
-  const { event_date, event_time, max_capacity, ...rest } = validated.data;
+  const { event_date, event_time, max_capacity, cover_image_url, ...rest } =
+    validated.data;
 
   // 날짜 + 시간 합산하여 ISO 문자열 생성
   const eventDatetime = `${event_date}T${event_time}:00`;
@@ -51,6 +52,8 @@ export async function createEvent(
       host_id: userId,
       invite_code: inviteCode,
       max_capacity: max_capacity ?? null,
+      // 커버 이미지 URL (업로드 완료 후 전달된 공개 URL)
+      cover_image_url: cover_image_url ?? null,
     })
     .select("id")
     .single();
@@ -96,7 +99,8 @@ export async function updateEvent(
     return { error: validated.error.issues[0].message };
   }
 
-  const { event_date, event_time, max_capacity, ...rest } = validated.data;
+  const { event_date, event_time, max_capacity, cover_image_url, ...rest } =
+    validated.data;
   const eventDatetime = `${event_date}T${event_time}:00`;
 
   const { error: updateError } = await supabase
@@ -105,6 +109,8 @@ export async function updateEvent(
       ...rest,
       event_date: eventDatetime,
       max_capacity: max_capacity ?? null,
+      // 커버 이미지 URL (업로드 완료 후 전달된 공개 URL, null이면 제거)
+      cover_image_url: cover_image_url ?? null,
     })
     .eq("id", eventId);
 
