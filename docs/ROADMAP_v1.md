@@ -1,7 +1,7 @@
 # 모임 매니저 MVP 개발 로드맵
 
 > 마지막 업데이트: 2026-02-26
-> 버전: v1.3
+> 버전: v1.4
 
 ## 프로젝트 개요
 
@@ -128,7 +128,7 @@ npx shadcn@latest add separator  # 구분선
 
 ---
 
-### Phase 2: 초대 코드 + 참여 시스템 (1주)
+### Phase 2: 초대 코드 + 참여 시스템 (1주) ✅ 완료
 
 **목표**: 비로그인 사용자도 초대 링크로 이벤트 미리보기 가능, 로그인 후 참여 신청/취소 처리
 **완료 기준**:
@@ -144,23 +144,24 @@ npx shadcn@latest add separator  # 구분선
 
 **미들웨어 수정**
 
-- [ ] `lib/supabase/proxy.ts` 수정: `/invite` 경로를 인증 예외 처리 (미들웨어 matcher에서 `/invite/*` 제외 또는 별도 분기 처리) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `lib/supabase/proxy.ts` 수정: `/invite` 경로를 인증 예외 처리 (미들웨어 matcher에서 `/invite/*` 제외 또는 별도 분기 처리) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
 
 **서버 액션 (app/protected/events/actions.ts에 추가)**
 
-- [ ] `joinEvent` Server Action 구현 (invite_code로 event_id 조회, 중복 신청 방지, join_policy 분기 처리) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [ ] `cancelParticipation` Server Action 구현 (본인 row의 status를 `cancelled`로 변경) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `getEventByInviteCode` 쿼리 함수 구현 (초대 코드로 이벤트 기본 정보 + 현재 승인 인원 조회) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `joinEvent` Server Action 구현 (invite_code로 event_id 조회, 중복 신청 방지, join_policy 분기 처리, 재신청 시 UPDATE 처리) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `cancelParticipation` Server Action 구현 (본인 row의 status를 `cancelled`로 변경) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `getEventByInviteCode` 쿼리 함수 구현 (초대 코드로 이벤트 기본 정보 + 현재 승인 인원 조회) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
 
 **컴포넌트**
 
-- [ ] `components/events/join-button.tsx` 구현 (비로그인 분기: 로그인 페이지 리다이렉트 + `next` 파라미터, 로그인: joinEvent 액션 호출, 상태별 UI: 신청 가능/대기중/승인됨/정원마감) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `components/events/join-button.tsx` 구현 (비로그인 분기: 로그인 페이지 리다이렉트 + `next` 파라미터, 로그인: joinEvent 액션 호출, 상태별 UI: 신청 가능/대기중/승인됨/정원마감/취소됨 재신청) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `components/events/cancel-participation-button.tsx` 구현 (AlertDialog 확인 후 cancelParticipation 액션 호출) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
 
 **페이지**
 
-- [ ] `app/invite/[code]/page.tsx` 구현 (공개 미리보기, 이벤트 기본 정보 표시, 유효하지 않은 코드 404 처리, JoinButton 연결) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [ ] 이벤트 상세 페이지(`[id]/page.tsx`)에 참여 취소 버튼 연결 (cancelParticipation 액션, 확인 다이얼로그) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `app/auth/login/page.tsx` 기존 로그인 플로우에 `next` 파라미터 복귀 처리 확인 및 필요 시 보완 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 중간
+- [x] `app/invite/[code]/page.tsx` 구현 (공개 미리보기, 커버 이미지 포함 이벤트 기본 정보 표시, 유효하지 않은 코드 404 처리, JoinButton 연결) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] 이벤트 상세 페이지(`[id]/page.tsx`)에 참여 취소 버튼 연결 (cancelParticipation 액션, 확인 다이얼로그, 참여 상태별 UI 분기) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `app/auth/login/page.tsx` 기존 로그인 플로우에 `next` 파라미터 복귀 처리 (LoginForm에 next prop 전달, 오픈 리다이렉트 방지) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 중간
 
 ---
 
@@ -338,7 +339,7 @@ app/
               page.tsx                      # 공지 수정 (Phase 3)
   invite/
     [code]/
-      page.tsx                              # 초대 코드 미리보기 (Phase 2)
+      page.tsx                              # 초대 코드 미리보기 (Phase 2) ✅
 
 components/
   events/
@@ -346,7 +347,8 @@ components/
     event-form.tsx                          # 이벤트 생성/수정 폼 (Phase 1) ✅
     invite-code-display.tsx                 # 초대 코드 복사 UI (Phase 1) ✅
     cancel-event-button.tsx                 # 이벤트 취소 버튼 ✅
-    join-button.tsx                         # 참여 신청 버튼 (Phase 2)
+    join-button.tsx                         # 참여 신청 버튼 (Phase 2) ✅
+    cancel-participation-button.tsx         # 참여 취소 버튼 (Phase 2) ✅
     participant-list.tsx                    # 참여자 목록 (Phase 4)
     participant-status-badge.tsx            # 참여 상태 배지 (Phase 4)
     announcements/
@@ -391,6 +393,7 @@ lib/
 
 | 버전 | 날짜       | 변경 내용                                                                                                                                     |
 | ---- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.4 | 2026-02-26 | Phase 2 완료 처리 (초대 코드 미리보기 페이지, 참여 신청/취소 시스템, 미들웨어 /invite 예외 처리, next 파라미터 로그인 복귀 처리)              |
 | v1.3 | 2026-02-26 | Phase 1 이후 리팩토링 반영 (라우트 그룹 마이그레이션, schemas.ts 분리, 레이아웃 개편, 인증 UI 한국어화, Suspense 적용), 파일 구조 표 업데이트 |
 | v1.2 | 2026-02-25 | Phase 1 완료 처리 (이벤트 CRUD, 서버 액션, 컴포넌트, 페이지)                                                                                  |
 | v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축)                                                                                      |
