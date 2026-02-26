@@ -79,6 +79,9 @@ export default async function EventDetailPage({
         {role === "host" && event.status === "active" && (
           <div className="flex shrink-0 gap-2">
             <Button variant="outline" asChild>
+              <Link href={`/events/${event.id}/manage`}>참여자 관리</Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link href={`/events/${event.id}/edit`}>수정</Link>
             </Button>
             <CancelEventButton eventId={event.id} />
@@ -132,6 +135,16 @@ export default async function EventDetailPage({
       <Separator />
 
       {/* 역할별 하단 UI */}
+      {/* 승인된 멤버(주최자 포함)에게 공지 보기 버튼 표시 */}
+      {(role === "host" ||
+        (role === "participant" && participantStatus === "approved")) && (
+        <div>
+          <Button variant="outline" className="w-full" asChild>
+            <Link href={`/events/${event.id}/announcements`}>공지 보기</Link>
+          </Button>
+        </div>
+      )}
+
       {role === "host" && (
         <div className="space-y-3">
           <p className="text-sm font-medium">초대 코드</p>

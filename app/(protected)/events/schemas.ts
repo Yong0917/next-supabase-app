@@ -6,6 +6,7 @@ import type {
   EventStatus,
   JoinPolicy,
   ParticipantStatus,
+  Profile,
 } from "@/lib/types";
 
 // 이벤트 폼 Zod 스키마 (클라이언트/서버 공용)
@@ -42,6 +43,15 @@ export type EventWithRole = {
 // 참여 이벤트 조회 반환 타입 (event_participants + events join)
 export type ParticipatingEvent = EventParticipant & {
   event: Event;
+};
+
+// 참여자 + 프로필 조합 타입 (참여자 관리 UI용)
+export type ParticipantWithProfile = {
+  id: string;
+  userId: string;
+  status: ParticipantStatus;
+  joinedAt: string;
+  profile: Pick<Profile, "id" | "username" | "full_name" | "avatar_url"> | null;
 };
 
 // 초대 코드로 조회한 이벤트 정보 반환 타입 (공개 미리보기용)

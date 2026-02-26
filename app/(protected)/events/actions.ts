@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import type { Event, ParticipantStatus } from "@/lib/types";
+import type { Event, ParticipantStatus, Profile } from "@/lib/types";
 
 import {
   EventFormSchema,
@@ -12,6 +12,7 @@ import {
   type EventWithRole,
   type InviteEventData,
   type ParticipatingEvent,
+  type ParticipantWithProfile,
 } from "./schemas";
 
 // 이벤트 생성
@@ -419,4 +420,182 @@ export async function getEventById(
     participantStatus,
     participantCount: participantCount ?? 0,
   };
+}
+
+// 이벤트 참여자 목록 조회 (주최자 전용, 프로필 join 포함)
+export async function getParticipantsByEvent(
+  eventId: string,
+): Promise<{ data: ParticipantWithProfile[] } | { error: string }> {
+  const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !authData?.claims) {
+    return { error: "인증이 필요합니다." };
+  }
+
+  const userId = authData.claims.sub;
+
+  // 주최자 검증
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single();
+
+  if (eventError || !event) {
+    return { error: "이벤트를 찾을 수 없습니다." };
+  }
+
+  if (event.host_id !== userId) {
+    return { error: "권한이 없습니다." };
+  }
+
+  // 참여자 목록 조회
+  const { data: participants, error: participantsError } = await supabase
+    .from("event_participants")
+    .select("id, user_id, status, joined_at")
+    .eq("event_id", eventId)
+    .order("joined_at", { ascending: true });
+
+  if (participantsError) {
+    return { error: "참여자 목록을 불러오는 데 실패했습니다." };
+  }
+
+  if (!participants || participants.length === 0) {
+    return { data: [] };
+  }
+
+  // 참여자들의 user_id 목록으로 프로필 조회 (FK 없으므로 별도 쿼리)
+  const userIds = participants.map((p) => p.user_id);
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id, username, full_name, avatar_url")
+    .in("id", userIds);
+
+  if (profilesError) {
+    return { error: "프로필 정보를 불러오는 데 실패했습니다." };
+  }
+
+  // 프로필 Map 생성 (userId → profile)
+  const profileMap = new Map<
+    string,
+    Pick<Profile, "id" | "username" | "full_name" | "avatar_url">
+  >();
+  for (const profile of profiles ?? []) {
+    profileMap.set(profile.id, profile);
+  }
+
+  // 참여자 + 프로필 조합
+  const result: ParticipantWithProfile[] = participants.map((p) => ({
+    id: p.id,
+    userId: p.user_id,
+    status: p.status,
+    joinedAt: p.joined_at,
+    profile: profileMap.get(p.user_id) ?? null,
+  }));
+
+  return { data: result };
+}
+
+// 참여자 승인 (주최자 전용, 정원 초과 시 에러)
+export async function approveParticipant(
+  participantId: string,
+  eventId: string,
+): Promise<{ error: string } | { success: true }> {
+  const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !authData?.claims) {
+    return { error: "인증이 필요합니다." };
+  }
+
+  const userId = authData.claims.sub;
+
+  // 이벤트 조회 및 주최자 검증
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select("host_id, max_capacity")
+    .eq("id", eventId)
+    .single();
+
+  if (eventError || !event) {
+    return { error: "이벤트를 찾을 수 없습니다." };
+  }
+
+  if (event.host_id !== userId) {
+    return { error: "권한이 없습니다." };
+  }
+
+  // 정원 초과 여부 확인 (max_capacity가 설정된 경우에만)
+  if (event.max_capacity !== null) {
+    const { count: approvedCount } = await supabase
+      .from("event_participants")
+      .select("*", { count: "exact", head: true })
+      .eq("event_id", eventId)
+      .eq("status", "approved");
+
+    if ((approvedCount ?? 0) >= event.max_capacity) {
+      return { error: "정원이 초과되어 승인할 수 없습니다." };
+    }
+  }
+
+  // 상태를 approved로 변경
+  const { error: updateError } = await supabase
+    .from("event_participants")
+    .update({ status: "approved" })
+    .eq("id", participantId);
+
+  if (updateError) {
+    return { error: "승인 처리에 실패했습니다. 다시 시도해주세요." };
+  }
+
+  revalidatePath(`/events/${eventId}/manage`);
+  revalidatePath(`/events/${eventId}`);
+
+  return { success: true };
+}
+
+// 참여자 거절 (주최자 전용)
+export async function rejectParticipant(
+  participantId: string,
+  eventId: string,
+): Promise<{ error: string } | { success: true }> {
+  const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !authData?.claims) {
+    return { error: "인증이 필요합니다." };
+  }
+
+  const userId = authData.claims.sub;
+
+  // 이벤트 조회 및 주최자 검증
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single();
+
+  if (eventError || !event) {
+    return { error: "이벤트를 찾을 수 없습니다." };
+  }
+
+  if (event.host_id !== userId) {
+    return { error: "권한이 없습니다." };
+  }
+
+  // 상태를 rejected로 변경
+  const { error: updateError } = await supabase
+    .from("event_participants")
+    .update({ status: "rejected" })
+    .eq("id", participantId);
+
+  if (updateError) {
+    return { error: "거절 처리에 실패했습니다. 다시 시도해주세요." };
+  }
+
+  revalidatePath(`/events/${eventId}/manage`);
+  revalidatePath(`/events/${eventId}`);
+
+  return { success: true };
 }
