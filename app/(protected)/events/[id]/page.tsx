@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getEventById } from "../actions";
 import { CancelEventButton } from "@/components/events/cancel-event-button";
+import { CancelParticipationButton } from "@/components/events/cancel-participation-button";
 import { InviteCodeDisplay } from "@/components/events/invite-code-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -142,14 +143,20 @@ export default async function EventDetailPage({
       )}
 
       {role === "participant" && participantStatus === "approved" && (
-        <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
-          참여가 승인되었습니다.
+        <div className="space-y-3">
+          <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+            참여가 승인되었습니다.
+          </div>
+          <CancelParticipationButton eventId={event.id} />
         </div>
       )}
 
       {role === "participant" && participantStatus === "pending" && (
-        <div className="rounded-md border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
-          승인 대기 중입니다. 주최자의 승인을 기다려 주세요.
+        <div className="space-y-3">
+          <div className="rounded-md border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
+            승인 대기 중입니다. 주최자의 승인을 기다려 주세요.
+          </div>
+          <CancelParticipationButton eventId={event.id} />
         </div>
       )}
 
