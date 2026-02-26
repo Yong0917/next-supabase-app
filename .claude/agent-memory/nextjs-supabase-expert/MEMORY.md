@@ -25,6 +25,16 @@
 - `components/sign-up-form.tsx` - handleGoogleSignUp 포함
 - Google SVG 아이콘 인라인으로 삽입 (lucide-react에 Google 아이콘 없음)
 
+## Supabase Storage (event-images 버킷, 구현 완료)
+
+- 버킷: `event-images` (공개, 5MB, jpeg/png/webp/gif)
+- 업로드 경로: `{userId}/{randomUUID}.{ext}`
+- Storage 유틸: `lib/supabase/storage.ts` (uploadEventImage, deleteEventImage, validateImageFile)
+- events 테이블에 `cover_image_url text DEFAULT NULL` 컬럼 추가됨
+- next.config.ts에 `*.supabase.co` remotePatterns 추가
+- EventForm에 `userId` prop 필수
+
 ## 주의사항
 
-- validate 실행 시 `.claude/agents/nextjs-supabase-expert.md` 포맷 경고 발생 (무시 가능, 구현 파일 아님)
+- validate 실행 시 `.claude/` 디렉토리 Prettier 경고 발생 → `.prettierignore`에 `.claude/` 추가로 해결
+- `app/(protected)/events/page.tsx` 76번째 줄 `item.events` → `item.event` 오타 수정 (기존 버그)

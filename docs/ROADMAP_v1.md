@@ -1,7 +1,7 @@
 # 모임 매니저 MVP 개발 로드맵
 
-> 마지막 업데이트: 2026-02-25
-> 버전: v1.2
+> 마지막 업데이트: 2026-02-26
+> 버전: v1.3
 
 ## 프로젝트 개요
 
@@ -116,7 +116,15 @@ npx shadcn@latest add separator  # 구분선
 - [x] `app/protected/events/new/page.tsx` 구현 (이벤트 생성 폼 페이지, createEvent 액션 연결) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
 - [x] `app/protected/events/[id]/page.tsx` 구현 (이벤트 상세, 역할 기반 조건부 UI: 주최자/승인참여자/대기참여자) | 담당: 풀스택 | 예상: 2d | 우선순위: 높음
 - [x] `app/protected/events/[id]/edit/page.tsx` 구현 (기존 데이터 prefill, 비주최자 403 처리) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [x] `app/protected/layout.tsx` 네비게이션 업데이트 (내 이벤트 목록 링크, 새 이벤트 만들기 링크 추가) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
+- [x] `app/(protected)/layout.tsx` 네비게이션 업데이트 (내 이벤트 목록 링크, 새 이벤트 만들기 링크 추가) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
+
+**Phase 1 완료 후 추가 작업 (리팩토링)**
+
+- [x] `app/protected` → `app/(protected)` 라우트 그룹으로 마이그레이션 (URL 구조 유지, Next.js App Router 컨벤션 적용)
+- [x] `app/(protected)/events/schemas.ts` 분리 (Zod 스키마를 actions.ts에서 독립 파일로 분리)
+- [x] 전역 레이아웃 개편 및 랜딩 페이지 리디자인 (공개 홈 페이지 UI 개선)
+- [x] 인증 UI 한국어화 및 리다이렉트 경로 변경
+- [x] `EventsPage`에 `Suspense` 적용 (blocking route 오류 수정)
 
 ---
 
@@ -305,17 +313,18 @@ Phase 0 (DB 스키마 + 타입)
 
 ```
 app/
-  protected/
+  (protected)/
     layout.tsx                              # 네비게이션 업데이트 (Phase 1)
     events/
-      actions.ts                            # 이벤트/참여 Server Actions (Phase 1, 2, 4)
-      page.tsx                              # 내 이벤트 목록 (Phase 1)
+      actions.ts                            # 이벤트/참여 Server Actions (Phase 1, 2, 4) ✅
+      schemas.ts                            # Zod 스키마 분리 파일 ✅
+      page.tsx                              # 내 이벤트 목록 (Phase 1) ✅
       new/
-        page.tsx                            # 이벤트 생성 (Phase 1)
+        page.tsx                            # 이벤트 생성 (Phase 1) ✅
       [id]/
-        page.tsx                            # 이벤트 상세 (Phase 1, 2)
+        page.tsx                            # 이벤트 상세 (Phase 1, 2) ✅
         edit/
-          page.tsx                          # 이벤트 수정 (Phase 1)
+          page.tsx                          # 이벤트 수정 (Phase 1) ✅
         manage/
           page.tsx                          # 참여자 관리 (Phase 4)
         announcements/
@@ -333,9 +342,10 @@ app/
 
 components/
   events/
-    event-card.tsx                          # 이벤트 카드 (Phase 1)
-    event-form.tsx                          # 이벤트 생성/수정 폼 (Phase 1)
-    invite-code-display.tsx                 # 초대 코드 복사 UI (Phase 1)
+    event-card.tsx                          # 이벤트 카드 (Phase 1) ✅
+    event-form.tsx                          # 이벤트 생성/수정 폼 (Phase 1) ✅
+    invite-code-display.tsx                 # 초대 코드 복사 UI (Phase 1) ✅
+    cancel-event-button.tsx                 # 이벤트 취소 버튼 ✅
     join-button.tsx                         # 참여 신청 버튼 (Phase 2)
     participant-list.tsx                    # 참여자 목록 (Phase 4)
     participant-status-badge.tsx            # 참여 상태 배지 (Phase 4)
@@ -379,8 +389,9 @@ lib/
 
 ## 변경 이력
 
-| 버전 | 날짜       | 변경 내용                                                    |
-| ---- | ---------- | ------------------------------------------------------------ |
-| v1.2 | 2026-02-25 | Phase 1 완료 처리 (이벤트 CRUD, 서버 액션, 컴포넌트, 페이지) |
-| v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축)     |
-| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반)                                      |
+| 버전 | 날짜       | 변경 내용                                                                                                                                     |
+| ---- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.3 | 2026-02-26 | Phase 1 이후 리팩토링 반영 (라우트 그룹 마이그레이션, schemas.ts 분리, 레이아웃 개편, 인증 UI 한국어화, Suspense 적용), 파일 구조 표 업데이트 |
+| v1.2 | 2026-02-25 | Phase 1 완료 처리 (이벤트 CRUD, 서버 액션, 컴포넌트, 페이지)                                                                                  |
+| v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축)                                                                                      |
+| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반)                                                                                                                       |

@@ -4,3 +4,5 @@ next-env.d.ts
 lib/types/database.ts
 package-lock.json
 shrimp_data/
+# 에이전트 메모리 파일 (Prettier 검사 제외)
+.claude/
