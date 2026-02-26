@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { createEvent } from "../actions";
 import { EventForm } from "@/components/events/event-form";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function NewEventPage() {
+async function NewEventContent() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
 
@@ -24,5 +25,13 @@ export default async function NewEventPage() {
         userId={userId}
       />
     </div>
+  );
+}
+
+export default function NewEventPage() {
+  return (
+    <Suspense>
+      <NewEventContent />
+    </Suspense>
   );
 }

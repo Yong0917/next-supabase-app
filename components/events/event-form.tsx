@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageIcon, Loader2, X } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -56,6 +56,7 @@ export function EventForm({
     formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm<EventFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(EventFormSchema) as any,
@@ -66,6 +67,21 @@ export function EventForm({
   });
 
   const joinPolicy = watch("join_policy");
+
+  // bfcache로 복원될 때 폼 초기화 (뒤로가기로 돌아온 경우)
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        reset({ join_policy: "open", ...defaultValues });
+        setImageFile(null);
+        setImagePreview(defaultValues?.cover_image_url ?? null);
+        setImageError(null);
+        setServerError(null);
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 파일 선택 핸들러
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +160,11 @@ export function EventForm({
   const isDisabled = isSubmitting || isUploading;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      autoComplete="off"
+      className="space-y-5"
+    >
       {/* 서버 오류 표시 */}
       {serverError && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">

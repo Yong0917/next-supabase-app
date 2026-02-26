@@ -78,6 +78,7 @@ export function ParticipantList({
         const displayName =
           participant.profile?.full_name ??
           participant.profile?.username ??
+          participant.email ??
           "알 수 없음";
 
         const formattedDate = new Date(participant.joinedAt).toLocaleDateString(
