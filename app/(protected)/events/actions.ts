@@ -10,6 +10,7 @@ import {
   EventFormSchema,
   type EventFormValues,
   type EventWithRole,
+  type InviteEventData,
   type ParticipatingEvent,
 } from "./schemas";
 
@@ -214,6 +215,152 @@ export async function getMyParticipatingEvents(): Promise<
   }
 
   return { data: participants as ParticipatingEvent[] };
+}
+
+// 초대 코드로 이벤트 공개 정보 + 승인 인원 수 조회 (비인증 접근 가능)
+export async function getEventByInviteCode(
+  inviteCode: string,
+): Promise<InviteEventData | { error: string }> {
+  const supabase = await createClient();
+
+  const { data: event, error } = await supabase
+    .from("events")
+    .select(
+      "id, title, description, location, event_date, max_capacity, join_policy, status, cover_image_url, invite_code",
+    )
+    .eq("invite_code", inviteCode)
+    .single();
+
+  if (error || !event) {
+    return { error: "유효하지 않은 초대 코드입니다." };
+  }
+
+  // 승인된 참여자 수 조회
+  const { count: participantCount } = await supabase
+    .from("event_participants")
+    .select("*", { count: "exact", head: true })
+    .eq("event_id", event.id)
+    .eq("status", "approved");
+
+  return {
+    ...event,
+    participantCount: participantCount ?? 0,
+  };
+}
+
+// 이벤트 참여 신청 (invite_code 기반, join_policy에 따라 자동 승인 또는 대기)
+export async function joinEvent(
+  inviteCode: string,
+): Promise<{ error: string } | never> {
+  const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !authData?.claims) {
+    return { error: "인증이 필요합니다." };
+  }
+
+  const userId = authData.claims.sub;
+
+  // invite_code로 이벤트 조회
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select("id, status, join_policy, max_capacity, host_id")
+    .eq("invite_code", inviteCode)
+    .single();
+
+  if (eventError || !event) {
+    return { error: "유효하지 않은 초대 코드입니다." };
+  }
+
+  if (event.status === "cancelled") {
+    return { error: "취소된 이벤트입니다." };
+  }
+
+  // 주최자 본인 신청 방지
+  if (event.host_id === userId) {
+    return { error: "주최자는 참여 신청할 수 없습니다." };
+  }
+
+  // 중복 신청 방지: 기존 참여 기록 조회
+  const { data: existing } = await supabase
+    .from("event_participants")
+    .select("id, status")
+    .eq("event_id", event.id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (
+    existing &&
+    existing.status !== "cancelled" &&
+    existing.status !== "rejected"
+  ) {
+    return { error: "이미 참여 신청한 이벤트입니다." };
+  }
+
+  // 정원 초과 확인 (max_capacity가 설정된 경우에만)
+  if (event.max_capacity !== null) {
+    const { count } = await supabase
+      .from("event_participants")
+      .select("*", { count: "exact", head: true })
+      .eq("event_id", event.id)
+      .eq("status", "approved");
+
+    if ((count ?? 0) >= event.max_capacity) {
+      return { error: "정원이 마감되었습니다." };
+    }
+  }
+
+  // join_policy 분기: open → 즉시 approved, approval → pending
+  const newStatus = event.join_policy === "open" ? "approved" : "pending";
+
+  if (existing) {
+    // 이전에 cancelled/rejected였으면 update로 재신청
+    const { error: updateError } = await supabase
+      .from("event_participants")
+      .update({ status: newStatus })
+      .eq("id", existing.id);
+
+    if (updateError) {
+      return { error: "참여 신청에 실패했습니다. 다시 시도해주세요." };
+    }
+  } else {
+    const { error: insertError } = await supabase
+      .from("event_participants")
+      .insert({ event_id: event.id, user_id: userId, status: newStatus });
+
+    if (insertError) {
+      return { error: "참여 신청에 실패했습니다. 다시 시도해주세요." };
+    }
+  }
+
+  redirect(`/events/${event.id}`);
+}
+
+// 이벤트 참여 취소 (본인 참여 상태를 cancelled로 변경)
+export async function cancelParticipation(
+  eventId: string,
+): Promise<{ error: string } | { success: true }> {
+  const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !authData?.claims) {
+    return { error: "인증이 필요합니다." };
+  }
+
+  const userId = authData.claims.sub;
+
+  const { error: updateError } = await supabase
+    .from("event_participants")
+    .update({ status: "cancelled" })
+    .eq("event_id", eventId)
+    .eq("user_id", userId);
+
+  if (updateError) {
+    return { error: "참여 취소에 실패했습니다. 다시 시도해주세요." };
+  }
+
+  revalidatePath(`/events/${eventId}`);
+  return { success: true };
 }
 
 // 이벤트 상세 조회 (현재 사용자 역할 포함)
