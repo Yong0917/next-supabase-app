@@ -1,7 +1,7 @@
 # 모임 매니저 MVP 개발 로드맵
 
 > 마지막 업데이트: 2026-02-26
-> 버전: v1.6
+> 버전: v1.7
 
 ## 프로젝트 개요
 
@@ -125,6 +125,7 @@ npx shadcn@latest add separator  # 구분선
 - [x] 전역 레이아웃 개편 및 랜딩 페이지 리디자인 (공개 홈 페이지 UI 개선)
 - [x] 인증 UI 한국어화 및 리다이렉트 경로 변경
 - [x] `EventsPage`에 `Suspense` 적용 (blocking route 오류 수정)
+- [x] 메인 페이지 CTA 버튼 로그인 상태 분기 처리 (`HeroButtons` async 서버 컴포넌트 분리 + `Suspense` 적용, 로그인 상태면 `/events`로 이동)
 
 ---
 
@@ -403,6 +404,7 @@ lib/
 
 | 버전 | 날짜       | 변경 내용                                                                                                                                                       |
 | ---- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.7 | 2026-02-26 | 메인 페이지 CTA 버튼 로그인 상태 분기 처리 (HeroButtons async 컴포넌트 분리 + Suspense 적용, blocking route 오류 수정)                                          |
 | v1.6 | 2026-02-26 | Phase 4 완료 처리 (approveParticipant, rejectParticipant, getParticipantsByEvent 서버 액션, participant-status-badge, participant-list 컴포넌트, manage 페이지) |
 | v1.5 | 2026-02-26 | Phase 3 완료 처리 (공지 CRUD 서버 액션 7개, 공지/댓글 컴포넌트 6개, 공지 페이지 4개, 결정 사항 6개 확정)                                                        |
 | v1.4 | 2026-02-26 | Phase 2 완료 처리 (초대 코드 미리보기 페이지, 참여 신청/취소 시스템, 미들웨어 /invite 예외 처리, next 파라미터 로그인 복귀 처리)                                |

@@ -34,6 +34,30 @@
 - next.config.ts에 `*.supabase.co` remotePatterns 추가
 - EventForm에 `userId` prop 필수
 
+## Phase 3: 공지 + 댓글 기능 (구현 완료)
+
+### 라우트 구조
+- `/events/[id]/announcements` - 공지 목록 (승인 멤버 열람)
+- `/events/[id]/announcements/new` - 공지 작성 (주최자 전용)
+- `/events/[id]/announcements/[announcementId]` - 공지 상세 + 댓글
+- `/events/[id]/announcements/[announcementId]/edit` - 공지 수정 (주최자 전용)
+
+### 핵심 파일
+- `app/(protected)/events/[id]/announcements/schemas.ts` - Zod 스키마 + 타입 정의
+- `app/(protected)/events/[id]/announcements/actions.ts` - 7개 서버 액션
+- `components/events/announcements/` - 6개 컴포넌트
+
+### Supabase 조인 주의사항
+- `from("table").select("*, related_table(field)")` 조인 결과는 배열 또는 단일 객체로 타입이 잘못 추론될 수 있음
+- FK가 없는 author_id → profiles join은 별도 `.in()` 쿼리로 처리 (JavaScript에서 조립)
+- 조인 타입 오류 시 별도 쿼리로 분리하는 것이 안전
+
+### 접근 제어 패턴
+- host: 모든 권한
+- participant(approved): 열람 + 댓글 작성 + 본인 댓글 삭제
+- participant(pending/rejected/cancelled): 안내 메시지 표시
+- none: 이벤트 상세 페이지로 redirect
+
 ## 주의사항
 
 - validate 실행 시 `.claude/` 디렉토리 Prettier 경고 발생 → `.prettierignore`에 `.claude/` 추가로 해결
