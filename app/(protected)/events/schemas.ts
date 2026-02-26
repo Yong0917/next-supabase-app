@@ -52,6 +52,7 @@ export type ParticipantWithProfile = {
   status: ParticipantStatus;
   joinedAt: string;
   profile: Pick<Profile, "id" | "username" | "full_name" | "avatar_url"> | null;
+  email: string | null;
 };
 
 // 초대 코드로 조회한 이벤트 정보 반환 타입 (공개 미리보기용)

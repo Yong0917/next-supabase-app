@@ -15,6 +15,9 @@ import {
   type ParticipantWithProfile,
 } from "./schemas";
 
+// 전체 이벤트 (참여자 수 포함) 타입
+export type PublicEventWithCount = Event & { participantCount: number };
+
 // 이벤트 생성
 export async function createEvent(
   formData: EventFormValues,
@@ -207,7 +210,7 @@ export async function getMyParticipatingEvents(): Promise<
 
   const { data: participants, error } = await supabase
     .from("event_participants")
-    .select("*, events(*)")
+    .select("*, event:events(*)")
     .eq("user_id", userId)
     .order("joined_at", { ascending: false });
 
@@ -216,6 +219,53 @@ export async function getMyParticipatingEvents(): Promise<
   }
 
   return { data: participants as ParticipatingEvent[] };
+}
+
+// 전체 공개 이벤트 목록 조회 (참여자 수 포함)
+export async function getAllEvents(): Promise<
+  { data: PublicEventWithCount[] } | { error: string }
+> {
+  const supabase = await createClient();
+  const { data, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !data?.claims) {
+    return { error: "인증이 필요합니다." };
+  }
+
+  const { data: events, error } = await supabase
+    .from("events")
+    .select("*")
+    .eq("status", "active")
+    .order("event_date", { ascending: true });
+
+  if (error) {
+    return { error: "이벤트 목록을 불러오는 데 실패했습니다." };
+  }
+
+  if (!events || events.length === 0) {
+    return { data: [] };
+  }
+
+  // 한 번의 쿼리로 모든 이벤트의 승인된 참여자 수 조회
+  const eventIds = events.map((e) => e.id);
+  const { data: participants } = await supabase
+    .from("event_participants")
+    .select("event_id")
+    .in("event_id", eventIds)
+    .eq("status", "approved");
+
+  // 이벤트별 참여자 수 집계
+  const countMap = new Map<string, number>();
+  for (const { event_id } of participants ?? []) {
+    countMap.set(event_id, (countMap.get(event_id) ?? 0) + 1);
+  }
+
+  return {
+    data: events.map((event) => ({
+      ...event,
+      participantCount: countMap.get(event.id) ?? 0,
+    })),
+  };
 }
 
 // 초대 코드로 이벤트 공개 정보 + 승인 인원 수 조회 (비인증 접근 가능)
@@ -465,14 +515,17 @@ export async function getParticipantsByEvent(
     return { data: [] };
   }
 
-  // 참여자들의 user_id 목록으로 프로필 조회 (FK 없으므로 별도 쿼리)
+  // 참여자들의 user_id 목록으로 프로필 + 이메일 조회
   const userIds = participants.map((p) => p.user_id);
-  const { data: profiles, error: profilesError } = await supabase
-    .from("profiles")
-    .select("id, username, full_name, avatar_url")
-    .in("id", userIds);
+  const [profilesResult, emailsResult] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, username, full_name, avatar_url")
+      .in("id", userIds),
+    supabase.rpc("get_user_emails", { user_ids: userIds }),
+  ]);
 
-  if (profilesError) {
+  if (profilesResult.error) {
     return { error: "프로필 정보를 불러오는 데 실패했습니다." };
   }
 
@@ -481,17 +534,25 @@ export async function getParticipantsByEvent(
     string,
     Pick<Profile, "id" | "username" | "full_name" | "avatar_url">
   >();
-  for (const profile of profiles ?? []) {
+  for (const profile of profilesResult.data ?? []) {
     profileMap.set(profile.id, profile);
   }
 
-  // 참여자 + 프로필 조합
+  // 이메일 Map 생성 (userId → email)
+  const emailMap = new Map<string, string>();
+  for (const row of (emailsResult.data as { id: string; email: string }[]) ??
+    []) {
+    emailMap.set(row.id, row.email);
+  }
+
+  // 참여자 + 프로필 + 이메일 조합
   const result: ParticipantWithProfile[] = participants.map((p) => ({
     id: p.id,
     userId: p.user_id,
     status: p.status,
     joinedAt: p.joined_at,
     profile: profileMap.get(p.user_id) ?? null,
+    email: emailMap.get(p.user_id) ?? null,
   }));
 
   return { data: result };
