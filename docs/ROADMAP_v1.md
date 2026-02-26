@@ -1,7 +1,7 @@
 # 모임 매니저 MVP 개발 로드맵
 
 > 마지막 업데이트: 2026-02-26
-> 버전: v1.4
+> 버전: v1.6
 
 ## 프로젝트 개요
 
@@ -165,7 +165,7 @@ npx shadcn@latest add separator  # 구분선
 
 ---
 
-### Phase 3: 공지 + 댓글 (1.5주)
+### Phase 3: 공지 + 댓글 (1.5주) ✅ 완료
 
 **목표**: 주최자가 이벤트 공지를 작성/수정/삭제하고, 승인된 참여자와 주최자가 공지를 열람 및 댓글로 소통
 **완료 기준**:
@@ -178,34 +178,36 @@ npx shadcn@latest add separator  # 구분선
 
 #### 태스크
 
-**서버 액션 (app/protected/events/[id]/announcements/actions.ts)**
+**서버 액션 (app/(protected)/events/[id]/announcements/actions.ts)**
 
-- [ ] `createAnnouncement` Server Action 구현 (host_id 검증, Supabase INSERT) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `updateAnnouncement` Server Action 구현 (author_id 검증, Supabase UPDATE) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `deleteAnnouncement` Server Action 구현 (author_id 검증, Supabase DELETE, cascade로 댓글도 삭제) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `createComment` Server Action 구현 (approved 참여자 또는 주최자 검증, Supabase INSERT) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `deleteComment` Server Action 구현 (author_id 검증, Supabase DELETE) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `getAnnouncements` 쿼리 함수 구현 (event_id로 목록, 댓글 수 포함) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `getAnnouncementById` 쿼리 함수 구현 (공지 상세 + 댓글 목록 + 작성자 프로필 join) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `createAnnouncement` Server Action 구현 (host_id 검증, Supabase INSERT) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `updateAnnouncement` Server Action 구현 (author_id 검증, Supabase UPDATE) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `deleteAnnouncement` Server Action 구현 (author_id 검증, Supabase DELETE, cascade로 댓글도 삭제) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `createComment` Server Action 구현 (approved 참여자 또는 주최자 검증, Supabase INSERT) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `deleteComment` Server Action 구현 (author_id 검증, Supabase DELETE) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `getAnnouncements` 쿼리 함수 구현 (event_id로 목록, 댓글 수 포함) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `getAnnouncementById` 쿼리 함수 구현 (공지 상세 + 댓글 목록 + 작성자 프로필 join) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
 
 **컴포넌트**
 
-- [ ] `components/events/announcements/announcement-card.tsx` 구현 (제목, 작성일, 댓글 수 표시) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
-- [ ] `components/events/announcements/announcement-form.tsx` 구현 (제목/내용 입력, 작성/수정 공용, React Hook Form + Zod) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
-- [ ] `components/events/announcements/comment-list.tsx` 구현 (댓글 목록, 작성자/내용/작성일, 본인 댓글 삭제 버튼) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
-- [ ] `components/events/announcements/comment-form.tsx` 구현 (댓글 입력 폼, createComment 액션 연결) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `components/events/announcements/announcement-card.tsx` 구현 (제목, 작성일, 댓글 수 표시) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `components/events/announcements/announcement-form.tsx` 구현 (제목/내용 입력, 작성/수정 공용, React Hook Form + Zod) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
+- [x] `components/events/announcements/comment-list.tsx` 구현 (댓글 목록, 작성자/내용/작성일, 본인 댓글 삭제 버튼) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
+- [x] `components/events/announcements/comment-form.tsx` 구현 (댓글 입력 폼, createComment 액션 연결) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `components/events/announcements/delete-announcement-button.tsx` 구현 (AlertDialog 확인 후 deleteAnnouncement 액션 호출) | 담당: 프론트엔드 | 우선순위: 높음
+- [x] `components/events/announcements/delete-comment-button.tsx` 구현 (본인 댓글 삭제 버튼, router.refresh() 갱신) | 담당: 프론트엔드 | 우선순위: 높음
 
 **페이지**
 
-- [ ] `app/protected/events/[id]/announcements/page.tsx` 구현 (공지 목록, 비승인 참여자 접근 제어, 주최자 전용 공지 작성 버튼) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [ ] `app/protected/events/[id]/announcements/new/page.tsx` 구현 (공지 작성, 비주최자 403 처리) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `app/protected/events/[id]/announcements/[announcementId]/page.tsx` 구현 (공지 상세, 댓글 목록/작성, 주최자 수정/삭제 버튼, 삭제 확인 다이얼로그) | 담당: 풀스택 | 예상: 1.5d | 우선순위: 높음
-- [ ] `app/protected/events/[id]/announcements/[announcementId]/edit/page.tsx` 구현 (공지 수정, 기존 데이터 prefill, 비주최자 403 처리) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] 이벤트 상세 페이지에 공지 탭 링크 연결 (주최자 + 승인된 참여자만 노출) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
+- [x] `app/(protected)/events/[id]/announcements/page.tsx` 구현 (공지 목록, 비승인 참여자 접근 제어, 주최자 전용 공지 작성 버튼) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `app/(protected)/events/[id]/announcements/new/page.tsx` 구현 (공지 작성, 비주최자 403 처리) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `app/(protected)/events/[id]/announcements/[announcementId]/page.tsx` 구현 (공지 상세, 댓글 목록/작성, 주최자 수정/삭제 버튼, 삭제 확인 다이얼로그) | 담당: 풀스택 | 예상: 1.5d | 우선순위: 높음
+- [x] `app/(protected)/events/[id]/announcements/[announcementId]/edit/page.tsx` 구현 (공지 수정, 기존 데이터 prefill, 비주최자 403 처리) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] 이벤트 상세 페이지에 공지 탭 링크 연결 (주최자 + 승인된 참여자만 노출) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 높음
 
 ---
 
-### Phase 4: 참여자 관리 UI (1주)
+### Phase 4: 참여자 관리 UI (1주) ✅ 완료
 
 **목표**: 주최자가 pending 신청자를 상태별로 확인하고 승인/거절 처리 가능
 **완료 기준**:
@@ -217,20 +219,21 @@ npx shadcn@latest add separator  # 구분선
 
 #### 태스크
 
-**서버 액션 (app/protected/events/actions.ts에 추가)**
+**서버 액션 (app/(protected)/events/actions.ts에 추가)**
 
-- [ ] `approveParticipant` Server Action 구현 (host_id 검증, 최대 인원 초과 여부 체크, status를 `approved`로 변경) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
-- [ ] `rejectParticipant` Server Action 구현 (host_id 검증, status를 `rejected`로 변경) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
-- [ ] `getParticipantsByEvent` 쿼리 함수 구현 (event_id로 전체 참여자 목록, 상태별 필터, 사용자 프로필 join) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `approveParticipant` Server Action 구현 (host_id 검증, 최대 인원 초과 여부 체크, status를 `approved`로 변경) | 담당: 풀스택 | 예상: 1d | 우선순위: 높음
+- [x] `rejectParticipant` Server Action 구현 (host_id 검증, status를 `rejected`로 변경) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
+- [x] `getParticipantsByEvent` 쿼리 함수 구현 (event_id로 전체 참여자 목록, 상태별 필터, 사용자 프로필 join) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 높음
 
 **컴포넌트**
 
-- [ ] `components/events/participant-status-badge.tsx` 구현 (pending/approved/rejected/cancelled 상태별 배지 색상) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
-- [ ] `components/events/participant-list.tsx` 구현 (참여자 목록, 이름/신청일시, pending 상태에 승인/거절 버튼) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
+- [x] `components/events/participant-status-badge.tsx` 구현 (pending/approved/rejected/cancelled 상태별 배지 색상) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 중간
+- [x] `components/events/participant-list.tsx` 구현 (참여자 목록, 이름/신청일시, pending 상태에 승인/거절 버튼) | 담당: 프론트엔드 | 예상: 1d | 우선순위: 높음
 
 **페이지**
 
-- [ ] `app/protected/events/[id]/manage/page.tsx` 구현 (상태별 탭, 승인인원/최대인원 현황, 비주최자 403 처리, ParticipantList 연결) | 담당: 풀스택 | 예상: 1.5d | 우선순위: 높음
+- [x] `app/(protected)/events/[id]/manage/page.tsx` 구현 (상태별 탭, 승인인원/최대인원 현황, 비주최자 403 처리, ParticipantList 연결) | 담당: 풀스택 | 예상: 1.5d | 우선순위: 높음
+- [x] 이벤트 상세 페이지에 주최자 전용 "참여자 관리" 링크 추가 (`/events/[id]/manage`) | 담당: 프론트엔드 | 우선순위: 높음
 
 ---
 
@@ -327,16 +330,17 @@ app/
         edit/
           page.tsx                          # 이벤트 수정 (Phase 1) ✅
         manage/
-          page.tsx                          # 참여자 관리 (Phase 4)
+          page.tsx                          # 참여자 관리 (Phase 4) ✅
         announcements/
-          actions.ts                        # 공지/댓글 Server Actions (Phase 3)
-          page.tsx                          # 공지 목록 (Phase 3)
+          actions.ts                        # 공지/댓글 Server Actions (Phase 3) ✅
+          schemas.ts                        # 공지/댓글 Zod 스키마 (Phase 3) ✅
+          page.tsx                          # 공지 목록 (Phase 3) ✅
           new/
-            page.tsx                        # 공지 작성 (Phase 3)
+            page.tsx                        # 공지 작성 (Phase 3) ✅
           [announcementId]/
-            page.tsx                        # 공지 상세 + 댓글 (Phase 3)
+            page.tsx                        # 공지 상세 + 댓글 (Phase 3) ✅
             edit/
-              page.tsx                      # 공지 수정 (Phase 3)
+              page.tsx                      # 공지 수정 (Phase 3) ✅
   invite/
     [code]/
       page.tsx                              # 초대 코드 미리보기 (Phase 2) ✅
@@ -349,13 +353,15 @@ components/
     cancel-event-button.tsx                 # 이벤트 취소 버튼 ✅
     join-button.tsx                         # 참여 신청 버튼 (Phase 2) ✅
     cancel-participation-button.tsx         # 참여 취소 버튼 (Phase 2) ✅
-    participant-list.tsx                    # 참여자 목록 (Phase 4)
-    participant-status-badge.tsx            # 참여 상태 배지 (Phase 4)
+    participant-list.tsx                    # 참여자 목록 (Phase 4) ✅
+    participant-status-badge.tsx            # 참여 상태 배지 (Phase 4) ✅
     announcements/
-      announcement-card.tsx                 # 공지 카드 (Phase 3)
-      announcement-form.tsx                 # 공지 작성/수정 폼 (Phase 3)
-      comment-list.tsx                      # 댓글 목록 (Phase 3)
-      comment-form.tsx                      # 댓글 입력 폼 (Phase 3)
+      announcement-card.tsx                 # 공지 카드 (Phase 3) ✅
+      announcement-form.tsx                 # 공지 작성/수정 폼 (Phase 3) ✅
+      comment-list.tsx                      # 댓글 목록 (Phase 3) ✅
+      comment-form.tsx                      # 댓글 입력 폼 (Phase 3) ✅
+      delete-announcement-button.tsx        # 공지 삭제 확인 버튼 (Phase 3) ✅
+      delete-comment-button.tsx             # 댓글 삭제 버튼 (Phase 3) ✅
 
 lib/
   types/
@@ -367,19 +373,23 @@ lib/
 
 ## 보류 사항 및 미결 질문
 
-### 결정 필요 사항
+### 결정 완료 사항
 
-1. **자동 승인 트리거 구현 위치**: `open` 이벤트의 즉시 승인을 DB 트리거로 구현할지, 서버 액션에서 직접 처리할지 결정 필요. DB 트리거는 코드 복잡도를 줄이지만 디버깅이 어려움. 서버 액션 처리가 더 명시적이므로 권장.
+1. **자동 승인 트리거 구현 위치**: ✅ 결정 완료 — 서버 액션(`joinEvent`)에서 `join_policy` 분기 처리로 구현. DB 트리거 없이 예측 가능하게 동작.
 
-2. **댓글 작성자 이름 표시**: `announcement_comments.author_id`를 통해 `profiles.full_name` 또는 `profiles.username` 중 어느 것을 표시할지 결정 필요. PRD에는 "작성자 이름"으로만 명시됨.
+2. **댓글 작성자 이름 표시**: ✅ 결정 완료 — `full_name`을 우선 표시하고, 없으면 `username`으로 fallback.
 
-3. **이벤트 완료 상태 처리**: `event_status`에 `completed` 값이 있으나 PRD에 완료 처리 기능이 명시되지 않음. MVP에서는 `active`/`cancelled` 만 사용하고 `completed`는 추후 구현으로 보류 권장.
+3. **이벤트 완료 상태 처리**: ✅ 결정 완료 — MVP에서는 `active`/`cancelled` 만 사용. `completed` 상태는 MVP 이후로 보류.
 
-4. **최대 인원 초과 시 승인 요청 처리**: `approveParticipant`에서 최대 인원 도달 시 에러 처리 방식 결정 필요 (에러 메시지 표시 or 승인 버튼 비활성화).
+4. **최대 인원 초과 시 승인 요청 처리**: ✅ 결정 완료 — `approveParticipant`에서 초과 시 에러 메시지 반환. 클라이언트에서 toast로 표시.
 
-5. **참여 취소(cancelled) 후 재신청 허용 여부**: 취소한 사용자가 동일 이벤트에 재신청 가능한지 PRD에 명시 없음. 동일 이벤트에 대한 중복 row 처리 방식 결정 필요 (UPSERT vs INSERT 중복 에러).
+5. **참여 취소(cancelled) 후 재신청 허용 여부**: ✅ 결정 완료 — 재신청 허용. `joinEvent`에서 기존 row가 `cancelled` 상태이면 UPSERT로 처리 (`pending`/`approved`로 갱신).
 
-6. **공지 댓글의 cascade 삭제**: 공지 삭제 시 하위 댓글도 자동 삭제되어야 하나 PRD에 명시 없음. DB 스키마에서 `ON DELETE CASCADE` 설정 여부 결정 필요.
+6. **공지 댓글의 cascade 삭제**: ✅ 결정 완료 — DB 스키마에 `ON DELETE CASCADE` 적용. 공지 삭제 시 하위 댓글 자동 삭제.
+
+### 미결 사항
+
+- 없음 (Phase 1~4 구현 완료 기준으로 모든 결정 사항 확정)
 
 ### 범위 외 기능 (MVP 이후)
 
@@ -391,10 +401,12 @@ lib/
 
 ## 변경 이력
 
-| 버전 | 날짜       | 변경 내용                                                                                                                                     |
-| ---- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| v1.4 | 2026-02-26 | Phase 2 완료 처리 (초대 코드 미리보기 페이지, 참여 신청/취소 시스템, 미들웨어 /invite 예외 처리, next 파라미터 로그인 복귀 처리)              |
-| v1.3 | 2026-02-26 | Phase 1 이후 리팩토링 반영 (라우트 그룹 마이그레이션, schemas.ts 분리, 레이아웃 개편, 인증 UI 한국어화, Suspense 적용), 파일 구조 표 업데이트 |
-| v1.2 | 2026-02-25 | Phase 1 완료 처리 (이벤트 CRUD, 서버 액션, 컴포넌트, 페이지)                                                                                  |
-| v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축)                                                                                      |
-| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반)                                                                                                                       |
+| 버전 | 날짜       | 변경 내용                                                                                                                                                       |
+| ---- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.6 | 2026-02-26 | Phase 4 완료 처리 (approveParticipant, rejectParticipant, getParticipantsByEvent 서버 액션, participant-status-badge, participant-list 컴포넌트, manage 페이지) |
+| v1.5 | 2026-02-26 | Phase 3 완료 처리 (공지 CRUD 서버 액션 7개, 공지/댓글 컴포넌트 6개, 공지 페이지 4개, 결정 사항 6개 확정)                                                        |
+| v1.4 | 2026-02-26 | Phase 2 완료 처리 (초대 코드 미리보기 페이지, 참여 신청/취소 시스템, 미들웨어 /invite 예외 처리, next 파라미터 로그인 복귀 처리)                                |
+| v1.3 | 2026-02-26 | Phase 1 이후 리팩토링 반영 (라우트 그룹 마이그레이션, schemas.ts 분리, 레이아웃 개편, 인증 UI 한국어화, Suspense 적용), 파일 구조 표 업데이트                   |
+| v1.2 | 2026-02-25 | Phase 1 완료 처리 (이벤트 CRUD, 서버 액션, 컴포넌트, 페이지)                                                                                                    |
+| v1.1 | 2026-02-25 | Phase 0 완료 처리 (패키지 설치, DB 셋업, 타입 체계 구축)                                                                                                        |
+| v1.0 | 2026-02-25 | 최초 작성 (PRD v1 기반)                                                                                                                                         |
