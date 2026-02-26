@@ -16,15 +16,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+interface LoginFormProps extends React.ComponentPropsWithoutRef<"div"> {
+  // 로그인 후 복귀할 경로 (오픈 리다이렉트 방지: /로 시작하는 경로만 허용)
+  next?: string;
+}
+
+export function LoginForm({ className, next, ...props }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  // 오픈 리다이렉트 방지: /로 시작하는 경로만 허용
+  const redirectPath = next?.startsWith("/") ? next : "/events";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +43,7 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      router.push("/events");
+      router.push(redirectPath);
       router.refresh();
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -53,10 +58,15 @@ export function LoginForm({
     setIsLoading(true);
     setError(null);
     try {
+      // next 파라미터를 callback URL에 포함하여 로그인 후 원래 경로로 복귀
+      const callbackUrl = next?.startsWith("/")
+        ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+        : `${window.location.origin}/auth/callback`;
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: callbackUrl,
         },
       });
       if (error) throw error;
