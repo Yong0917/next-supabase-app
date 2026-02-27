@@ -2,6 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { getEventByInviteCode } from "@/app/(protected)/events/actions";
+import { HostActionPanel } from "@/components/events/host-action-panel";
 import { JoinButton } from "@/components/events/join-button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -26,6 +27,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
   const supabase = await createClient();
   const { data: authData } = await supabase.auth.getClaims();
   const isLoggedIn = !!authData?.claims;
+  const isHost = isLoggedIn && authData?.claims?.sub === result.host_id;
 
   let currentStatus: ParticipantStatus | "none" = "none";
 
@@ -148,14 +150,18 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
       <Separator />
 
-      {/* 참여 신청 버튼 */}
-      <JoinButton
-        inviteCode={code}
-        isLoggedIn={isLoggedIn}
-        currentStatus={currentStatus}
-        isFull={isFull}
-        eventStatus={result.status}
-      />
+      {/* 참여 신청 버튼 / 주최자 관리 패널 */}
+      {isHost ? (
+        <HostActionPanel eventId={result.id} />
+      ) : (
+        <JoinButton
+          inviteCode={code}
+          isLoggedIn={isLoggedIn}
+          currentStatus={currentStatus}
+          isFull={isFull}
+          eventStatus={result.status}
+        />
+      )}
     </div>
   );
 }
