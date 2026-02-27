@@ -6,24 +6,31 @@ import { useState } from "react";
 import type { ParticipantWithProfile } from "@/app/(protected)/events/schemas";
 import {
   approveParticipant,
-  rejectParticipant,
+  toggleAttendance,
 } from "@/app/(protected)/events/actions";
+import { useActionToast } from "@/lib/hooks/use-action-toast";
 import { ParticipantStatusBadge } from "./participant-status-badge";
+import { RejectDialog } from "./reject-dialog";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ParticipantListProps {
   participants: ParticipantWithProfile[];
   eventId: string;
   // pending 탭에서만 승인/거절 버튼 표시
   showActions?: boolean;
+  // approved 탭에서 출석 체크 표시
+  showAttendance?: boolean;
 }
 
 export function ParticipantList({
   participants,
   eventId,
   showActions = false,
+  showAttendance = false,
 }: ParticipantListProps) {
   const router = useRouter();
+  const { handleResult } = useActionToast();
   // 개별 처리 중 상태 관리 (participantId → boolean)
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
@@ -44,21 +51,25 @@ export function ParticipantList({
     const result = await approveParticipant(participantId, eventId);
     setLoading(participantId, false);
 
-    if ("error" in result) {
-      alert(result.error);
-    } else {
+    handleResult(result, "승인 처리되었습니다.");
+    if ("success" in result) {
       router.refresh();
     }
   };
 
-  const handleReject = async (participantId: string) => {
+  const handleToggleAttendance = async (
+    participantId: string,
+    attended: boolean,
+  ) => {
     setLoading(participantId, true);
-    const result = await rejectParticipant(participantId, eventId);
+    const result = await toggleAttendance(participantId, eventId, attended);
     setLoading(participantId, false);
 
-    if ("error" in result) {
-      alert(result.error);
-    } else {
+    handleResult(
+      result,
+      attended ? "출석 처리되었습니다." : "결석 처리되었습니다.",
+    );
+    if ("success" in result) {
       router.refresh();
     }
   };
@@ -106,7 +117,34 @@ export function ParticipantList({
               <p className="mt-0.5 text-xs text-muted-foreground">
                 신청일: {formattedDate}
               </p>
+              {/* 거절 사유 표시 */}
+              {participant.status === "rejected" &&
+                participant.rejection_reason && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    거절 사유: {participant.rejection_reason}
+                  </p>
+                )}
             </div>
+
+            {/* 출석 체크 (approved 탭에서만 표시) */}
+            {showAttendance && participant.status === "approved" && (
+              <div className="flex shrink-0 items-center gap-2">
+                <Checkbox
+                  id={`attendance-${participant.id}`}
+                  checked={participant.attended}
+                  disabled={isLoading}
+                  onCheckedChange={(checked) =>
+                    handleToggleAttendance(participant.id, checked === true)
+                  }
+                />
+                <label
+                  htmlFor={`attendance-${participant.id}`}
+                  className="text-sm text-muted-foreground"
+                >
+                  출석
+                </label>
+              </div>
+            )}
 
             {/* 승인/거절 버튼 (pending 탭에서만 표시) */}
             {showActions && participant.status === "pending" && (
@@ -118,14 +156,12 @@ export function ParticipantList({
                 >
                   {isLoading ? "처리 중..." : "승인"}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleReject(participant.id)}
+                <RejectDialog
+                  participantId={participant.id}
+                  eventId={eventId}
                   disabled={isLoading}
-                >
-                  거절
-                </Button>
+                  onSuccess={() => router.refresh()}
+                />
               </div>
             )}
           </li>

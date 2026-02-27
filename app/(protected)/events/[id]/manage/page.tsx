@@ -142,7 +142,11 @@ export default async function ManagePage({
         </TabsContent>
 
         <TabsContent value="approved" className="mt-4">
-          <ParticipantList participants={approvedList} eventId={id} />
+          <ParticipantList
+            participants={approvedList}
+            eventId={id}
+            showAttendance={true}
+          />
         </TabsContent>
 
         <TabsContent value="rejected" className="mt-4">
