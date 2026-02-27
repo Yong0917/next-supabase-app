@@ -1,7 +1,7 @@
 # 모임 매니저 v2 개발 로드맵
 
-> 마지막 업데이트: 2026-02-26
-> 버전: v2.0
+> 마지막 업데이트: 2026-02-27
+> 버전: v2.3
 
 ## 프로젝트 개요
 
@@ -54,7 +54,7 @@ npx shadcn@latest add sonner
 
 ## 개발 로드맵
 
-### Phase 1: 버그 수정 및 엣지케이스 처리 (1주) — 최우선
+### Phase 1: 버그 수정 및 엣지케이스 처리 (1주) ✅ 완료
 
 **목표**: 실제 운영 시 발생하는 버그와 보안/정합성 문제를 선제적으로 제거한다.
 가장 영향도가 높은 "invite 페이지 주최자 경험 누락"과 상태 검증 미비, 이미지 롤백 누락을
@@ -72,32 +72,32 @@ npx shadcn@latest add sonner
 
 **1-1. invite 페이지 주최자 경험 개선**
 
-- [ ] `app/(protected)/events/actions.ts` 수정: `getEventByInviteCode` SELECT 쿼리에 `host_id` 필드 추가, `InviteEventData` 반환 타입에 `host_id: string` 포함 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
-- [ ] `app/(protected)/events/schemas.ts` 수정: `InviteEventData` 타입에 `host_id: string` 필드 추가 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
-- [ ] `app/invite/[code]/page.tsx` 수정: `authData.claims.sub`와 `result.host_id` 비교하여 `isHost` 도출, 하단 UI를 `isHost` 분기로 교체 (isHost이면 `HostActionPanel`, 아니면 기존 `JoinButton`) | 담당: 풀스택 | 예상: 1d | 우선순위: 🔴높음
-- [ ] `components/events/host-action-panel.tsx` 신규 생성: 초대 페이지에서 주최자에게 표시하는 관리 액션 패널 (참여자 관리 Link, 이벤트 수정 Link, CancelEventButton 재사용) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/actions.ts` 수정: `getEventByInviteCode` SELECT 쿼리에 `host_id` 필드 추가, `InviteEventData` 반환 타입에 `host_id: string` 포함 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/schemas.ts` 수정: `InviteEventData` 타입에 `host_id: string` 필드 추가 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `app/invite/[code]/page.tsx` 수정: `authData.claims.sub`와 `result.host_id` 비교하여 `isHost` 도출, 하단 UI를 `isHost` 분기로 교체 (isHost이면 `HostActionPanel`, 아니면 기존 `JoinButton`) | 담당: 풀스택 | 예상: 1d | 우선순위: 🔴높음
+- [x] `components/events/host-action-panel.tsx` 신규 생성: 초대 페이지에서 주최자에게 표시하는 관리 액션 패널 (참여자 관리 Link, 이벤트 수정 Link, CancelEventButton 재사용) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🔴높음
 
 **1-2. joinEvent 상태 검증 강화**
 
-- [ ] `app/(protected)/events/actions.ts` 수정: `joinEvent` 함수 내 상태 체크를 `event.status !== 'active'`로 교체하여 cancelled/completed 이벤트 모두 참여 방지 (`"진행 중인 이벤트가 아닙니다."` 에러 반환) | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/actions.ts` 수정: `joinEvent` 함수 내 상태 체크를 `event.status !== 'active'`로 교체하여 cancelled/completed 이벤트 모두 참여 방지 (`"진행 중인 이벤트가 아닙니다."` 에러 반환) | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
 
 **1-3. approveParticipant 이중 처리 방지**
 
-- [ ] `app/(protected)/events/actions.ts` 수정: `approveParticipant` 함수 내 정원 체크 이전에 현재 participant `status` 조회 추가, `pending`이 아니면 `"이미 처리된 신청입니다."` 에러 반환 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
-- [ ] `app/(protected)/events/actions.ts` 수정: `rejectParticipant` 함수에도 동일 패턴 적용 (`pending`이 아니면 에러 반환) | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/actions.ts` 수정: `approveParticipant` 함수 내 정원 체크 이전에 현재 participant `status` 조회 추가, `pending`이 아니면 `"이미 처리된 신청입니다."` 에러 반환 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/actions.ts` 수정: `rejectParticipant` 함수에도 동일 패턴 적용 (`pending`이 아니면 에러 반환) | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
 
 **1-4. 이미지 업로드 실패 시 Storage 롤백**
 
-- [ ] `lib/supabase/storage-server.ts` 신규 생성: 서버 액션에서 호출 가능한 이미지 삭제 헬퍼 함수 (`deleteEventImageServer`) - `createClient` 서버 버전으로 `storage.from().remove()` 호출 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
-- [ ] `app/(protected)/events/actions.ts` 수정: `createEvent` 함수에서 이벤트 INSERT 실패 시 `cover_image_url`이 있으면 `deleteEventImageServer` 호출하여 고아 파일 정리 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] `lib/supabase/storage-server.ts` 신규 생성: 서버 액션에서 호출 가능한 이미지 삭제 헬퍼 함수 (`deleteEventImageServer`) - `createClient` 서버 버전으로 `storage.from().remove()` 호출 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/actions.ts` 수정: `createEvent` 함수에서 이벤트 INSERT 실패 시 `cover_image_url`이 있으면 `deleteEventImageServer` 호출하여 고아 파일 정리 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
 
 **1-5. Phase 1 검증**
 
-- [ ] `npm run validate` 실행 및 오류 수정 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `npm run validate` 실행 및 오류 수정 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
 
 ---
 
-### Phase 2: UX 품질 개선 (1주)
+### Phase 2: UX 품질 개선 (1주) ✅ 완료
 
 **목표**: 사용자 피드백(알림, 에러 메시지, 역할 표시)을 일관되게 정비하여 서비스 신뢰도를 높인다.
 `alert()` 전량 제거, toast 시스템 도입, 이벤트 목록 역할 배지 추가.
@@ -114,36 +114,36 @@ npx shadcn@latest add sonner
 
 **2-1. Sonner(toast) 설치 및 설정**
 
-- [ ] `npx shadcn@latest add sonner` 실행, `app/layout.tsx`에 `<Toaster />` 추가 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🔴높음
-- [ ] `lib/hooks/use-action-toast.ts` 신규 작성: 서버 액션 결과 `{ error: string } | { success: true }`를 받아 자동으로 toast 호출하는 유틸 훅 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] `npx shadcn@latest add sonner` 실행, `app/layout.tsx`에 `<Toaster />` 추가 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `lib/hooks/use-action-toast.ts` 신규 작성: 서버 액션 결과 `{ error: string } | { success: true }`를 받아 자동으로 toast 호출하는 유틸 훅 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
 
 **2-2. ParticipantList alert() → toast 전환**
 
-- [ ] `components/events/participant-list.tsx` 수정: `handleApprove`, `handleReject` 내 `alert(result.error)` 제거, `toast.success` / `toast.error`로 교체 (승인 성공/실패, 거절 성공/실패 메시지 구체화) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] `components/events/participant-list.tsx` 수정: `handleApprove`, `handleReject` 내 `alert(result.error)` 제거, `toast.success` / `toast.error`로 교체 (승인 성공/실패, 거절 성공/실패 메시지 구체화) | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🔴높음
 
 **2-3. CancelEventButton, CancelParticipationButton toast 통일**
 
-- [ ] `components/events/cancel-event-button.tsx` 수정: 이벤트 취소 성공/실패 toast 적용 (AlertDialog 유지) | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
-- [ ] `components/events/cancel-participation-button.tsx` 수정: 참여 취소 성공/실패 toast 적용 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] `components/events/cancel-event-button.tsx` 수정: 이벤트 취소 성공/실패 toast 적용 (AlertDialog 유지) | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] `components/events/cancel-participation-button.tsx` 수정: 참여 취소 성공/실패 toast 적용 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
 
 **2-4. 이벤트 목록 역할 배지 표시**
 
-- [ ] `app/(protected)/events/actions.ts` 수정: `getAllEvents` 반환 타입에 `myRole?: 'host' | 'participant' | null` 추가, 현재 사용자의 host_id/참여 여부를 기준으로 필드 채움 | 담당: 풀스택 | 예상: 0.75d | 우선순위: 🟡중간
-- [ ] `components/events/event-card.tsx` 수정: `myRole` prop 추가, `host`이면 "주최" 배지, `participant`이면 "참여 중" 배지를 카드 상단에 오버레이 표시 | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🟡중간
-- [ ] `app/(protected)/events/page.tsx` 수정: 전체 이벤트 탭에서 `myRole` 전달 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] `app/(protected)/events/actions.ts` 수정: `getAllEvents` 반환 타입에 `myRole?: 'host' | 'participant' | null` 추가, 현재 사용자의 host_id/참여 여부를 기준으로 필드 채움 | 담당: 풀스택 | 예상: 0.75d | 우선순위: 🟡중간
+- [x] `components/events/event-card.tsx` 수정: `myRole` prop 추가, `host`이면 "주최" 배지, `participant`이면 "참여 중" 배지를 카드 상단에 오버레이 표시 | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🟡중간
+- [x] `app/(protected)/events/page.tsx` 수정: 전체 이벤트 탭에서 `myRole` 전달 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
 
 **2-5. 에러 메시지 구체화**
 
-- [ ] `app/(protected)/events/actions.ts` 수정: `cancelParticipation`에서 이미 `cancelled` 상태 호출 시 `"이미 취소된 참여입니다."` 에러 추가 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] `app/(protected)/events/actions.ts` 수정: `cancelParticipation`에서 이미 `cancelled` 상태 호출 시 `"이미 취소된 참여입니다."` 에러 추가 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🟡중간
 
 **2-6. Phase 2 검증**
 
-- [ ] 전체 코드베이스 `alert(` 문자열 grep 검색으로 잔존 여부 확인 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
-- [ ] `npm run validate` 실행 및 오류 수정 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] 전체 코드베이스 `alert(` 문자열 grep 검색으로 잔존 여부 확인 (0건 확인) | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `npm run validate` 실행 및 오류 수정 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
 
 ---
 
-### Phase 3: 신규 기능 추가 (2주)
+### Phase 3: 신규 기능 추가 (2주) ✅ 완료
 
 **목표**: 실제 모임 운영에 필요한 4가지 신규 기능을 추가한다.
 이벤트 복제로 반복 모임 생성 부담 감소, 필터/검색으로 이벤트 탐색 개선,
@@ -161,37 +161,36 @@ npx shadcn@latest add sonner
 
 **3-1. 이벤트 복제**
 
-- [ ] `app/(protected)/events/actions.ts` 수정: `duplicateEvent` Server Action 구현 (source event_id로 기존 이벤트 조회, invite_code 신규 생성, status=`active`, 날짜/시간 초기화) | 담당: 풀스택 | 예상: 1d | 우선순위: 🔴높음
-- [ ] `app/(protected)/events/[id]/page.tsx` 수정: 주최자 액션 영역에 "이 이벤트 복제" 버튼 추가, 클릭 시 `/events/new?from=[id]`로 이동 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🔴높음
-- [ ] `app/(protected)/events/new/page.tsx` 수정: `searchParams.from` 값이 있으면 `getEventById`로 원본 이벤트 조회 후 `EventForm` `defaultValues`로 전달 (단, `event_date`, `event_time`, `cover_image_url` 제외) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/[id]/page.tsx` 수정: 주최자 액션 영역에 "복제" 버튼 추가, 클릭 시 `/events/new?from=[id]`로 이동 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/new/page.tsx` 수정: `searchParams.from` 값이 있으면 `getEventById`로 원본 이벤트 조회 후 `EventForm` `defaultValues`로 전달 (단, `event_date`, `event_time`, `cover_image_url` 제외) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
 
 **3-2. 이벤트 목록 필터/검색**
 
-- [ ] `app/(protected)/events/actions.ts` 수정: `getAllEvents` 함수에 `options?: { search?: string; status?: EventStatus }` 파라미터 추가, Supabase `.ilike`, `.eq` 체이닝으로 서버 사이드 필터 | 담당: 풀스택 | 예상: 1d | 우선순위: 🟡중간
-- [ ] `components/events/event-filter.tsx` 신규 생성: 검색어 Input, 상태 Select로 구성된 클라이언트 컴포넌트, onChange 시 URL searchParams 업데이트 (`useRouter`) | 담당: 프론트엔드 | 예상: 1.5d | 우선순위: 🟡중간
-- [ ] `app/(protected)/events/page.tsx` 수정: `searchParams` prop 추가, `EventFilter` 컴포넌트 삽입, 전체 이벤트 탭에 필터 파라미터 전달 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🟡중간
+- [x] `app/(protected)/events/actions.ts` 수정: `getAllEvents` 함수에 `options?: { search?: string; status?: string }` 파라미터 추가, Supabase `.ilike`, `.eq` 체이닝으로 서버 사이드 필터 | 담당: 풀스택 | 예상: 1d | 우선순위: 🟡중간
+- [x] `components/events/event-filter.tsx` 신규 생성: 검색어 Input, 상태 Select로 구성된 클라이언트 컴포넌트, onChange 시 URL searchParams 업데이트 (`useRouter`) | 담당: 프론트엔드 | 예상: 1.5d | 우선순위: 🟡중간
+- [x] `app/(protected)/events/page.tsx` 수정: `searchParams` prop 추가, `EventFilter` 컴포넌트 삽입, 전체 이벤트 탭에 필터 파라미터 전달 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🟡중간
 
 **3-3. 출석 체크**
 
-- [ ] Supabase migration: `event_participants` 테이블에 `attended boolean DEFAULT false` 컬럼 추가, RLS 정책 확인 (UPDATE는 host만 가능) | 담당: 백엔드 | 예상: 0.5d | 우선순위: 🟡중간
-- [ ] `lib/types/database.ts` 재생성: `npx supabase gen types typescript` 실행 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
-- [ ] `app/(protected)/events/actions.ts` 수정: `toggleAttendance(participantId, eventId, attended)` Server Action 추가 (host_id 검증 포함) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🟡중간
-- [ ] `app/(protected)/events/schemas.ts` 수정: `ParticipantWithProfile` 타입에 `attended: boolean` 필드 추가 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🟡중간
-- [ ] `components/events/participant-list.tsx` 수정: `showAttendance?: boolean` prop 추가, approved 목록 각 행에 출석 Checkbox 표시 및 `toggleAttendance` 액션 연결 | 담당: 프론트엔드 | 예상: 0.75d | 우선순위: 🟡중간
-- [ ] `app/(protected)/events/[id]/manage/page.tsx` 수정: approved 탭의 `ParticipantList`에 `showAttendance={true}` 전달 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] Supabase migration: `event_participants` 테이블에 `attended boolean DEFAULT false` 컬럼 추가 | 담당: 백엔드 | 예상: 0.5d | 우선순위: 🟡중간
+- [x] `lib/types/database.ts` 재생성: `npx supabase gen types typescript` 실행 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/actions.ts` 수정: `toggleAttendance(participantId, eventId, attended)` Server Action 추가 (host_id 검증 포함) | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🟡중간
+- [x] `app/(protected)/events/schemas.ts` 수정: `ParticipantWithProfile` 타입에 `attended: boolean` 필드 추가 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] `components/events/participant-list.tsx` 수정: `showAttendance?: boolean` prop 추가, approved 목록 각 행에 출석 Checkbox 표시 및 `toggleAttendance` 액션 연결 | 담당: 프론트엔드 | 예상: 0.75d | 우선순위: 🟡중간
+- [x] `app/(protected)/events/[id]/manage/page.tsx` 수정: approved 탭의 `ParticipantList`에 `showAttendance={true}` 전달 | 담당: 프론트엔드 | 예상: 0.25d | 우선순위: 🟡중간
 
 **3-4. 거절 사유 입력 및 표시**
 
-- [ ] Supabase migration: `event_participants` 테이블에 `rejection_reason text DEFAULT NULL` 컬럼 추가 (3-3 migration과 함께 처리 권장) | 담당: 백엔드 | 예상: 0.25d | 우선순위: 🟡중간
-- [ ] `lib/types/database.ts` 재생성 (3-3 처리 시 1회 통합 가능) | 담당: 풀스택 | 예상: 0d | 우선순위: 🔴높음
-- [ ] `app/(protected)/events/actions.ts` 수정: `rejectParticipant` 시그니처에 `reason?: string` 파라미터 추가, UPDATE 시 `rejection_reason` 포함 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🟡중간
-- [ ] `components/events/reject-dialog.tsx` 신규 생성: AlertDialog 기반, "거절 사유 (선택)" Textarea 포함, 확인 시 `rejectParticipant(id, eventId, reason)` 호출 | 담당: 프론트엔드 | 예상: 1d | 우선순위: 🟡중간
-- [ ] `components/events/participant-list.tsx` 수정: 기존 "거절" 버튼을 `RejectDialog`로 교체, rejected 목록에서 `rejection_reason` 있으면 이름 아래 표시 | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🟡중간
+- [x] Supabase migration: `event_participants` 테이블에 `rejection_reason text DEFAULT NULL` 컬럼 추가 (3-3 migration과 함께 처리) | 담당: 백엔드 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] `lib/types/database.ts` 재생성 (3-3과 통합) | 담당: 풀스택 | 예상: 0d | 우선순위: 🔴높음
+- [x] `app/(protected)/events/actions.ts` 수정: `rejectParticipant` 시그니처에 `reason?: string` 파라미터 추가, UPDATE 시 `rejection_reason` 포함 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🟡중간
+- [x] `components/events/reject-dialog.tsx` 신규 생성: AlertDialog 기반, "거절 사유 (선택)" Textarea 포함, 확인 시 `rejectParticipant(id, eventId, reason)` 호출 | 담당: 프론트엔드 | 예상: 1d | 우선순위: 🟡중간
+- [x] `components/events/participant-list.tsx` 수정: 기존 "거절" 버튼을 `RejectDialog`로 교체, rejected 목록에서 `rejection_reason` 있으면 이름 아래 표시 | 담당: 프론트엔드 | 예상: 0.5d | 우선순위: 🟡중간
 
 **3-5. Phase 3 검증**
 
-- [ ] DB 컬럼 추가 후 타입 재생성 확인 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
-- [ ] `npm run validate` 실행 및 오류 수정 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
+- [x] DB 컬럼 추가 후 타입 재생성 확인 | 담당: 풀스택 | 예상: 0.25d | 우선순위: 🔴높음
+- [x] `npm run validate` 실행 및 오류 수정 | 담당: 풀스택 | 예상: 0.5d | 우선순위: 🔴높음
 
 ---
 
@@ -356,6 +355,9 @@ Phase 1 (버그 수정)
 
 ## 변경 이력
 
-| 버전 | 날짜       | 변경 내용                                                                                                                                                 |
-| ---- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v2.0 | 2026-02-26 | v1 Phase 0~4 완료 기준으로 v2 최초 작성. Phase 1(버그/엣지케이스), Phase 2(UX 통일), Phase 3(신규 기능), Phase 4(고급 기능) 4단계 로드맵 설계. 배포 제외. |
+| 버전 | 날짜       | 변경 내용                                                                                                                                                                                                                                                                 |
+| ---- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.3 | 2026-02-27 | Phase 2 완료 처리 (Sonner toast 설치, use-action-toast 훅 생성, ParticipantList/CancelEventButton/CancelParticipationButton alert() → toast 전환, getAllEvents myRole 반환, EventCard 역할 배지 추가, cancelParticipation 이미 취소된 참여 에러 처리, alert() 0건 확인)   |
+| v2.2 | 2026-02-27 | Phase 3 완료 처리 (DB migration: attended+rejection_reason 컬럼 추가, 타입 재생성, toggleAttendance/rejectParticipant(reason)/getAllEvents(filter) 서버 액션 추가/수정, EventFilter/RejectDialog 컴포넌트 신규 생성, ParticipantList 수정, 이벤트 복제 버튼+prefill 지원) |
+| v2.1 | 2026-02-26 | Phase 1 완료 처리 (invite 페이지 주최자 분기/HostActionPanel 신규 생성, joinEvent 상태 검증 강화, approveParticipant/rejectParticipant 이중 처리 방지, createEvent 이미지 롤백, storage-server.ts 신규 생성)                                                              |
+| v2.0 | 2026-02-26 | v1 Phase 0~4 완료 기준으로 v2 최초 작성. Phase 1(버그/엣지케이스), Phase 2(UX 통일), Phase 3(신규 기능), Phase 4(고급 기능) 4단계 로드맵 설계. 배포 제외.                                                                                                                 |
