@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { CalendarDays, CalendarPlus, Home } from "lucide-react";
 
 import { AuthButton } from "@/components/auth-button";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -101,6 +102,7 @@ export default function RootLayout({
               </Link>
             </div>
           </nav>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
