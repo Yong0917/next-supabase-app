@@ -9,13 +9,18 @@ import {
   getMyParticipatingEvents,
 } from "./actions";
 import { EventCard } from "@/components/events/event-card";
+import { EventFilter } from "@/components/events/event-filter";
 import { InviteCodeInput } from "@/components/events/invite-code-input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createClient } from "@/lib/supabase/server";
 
-async function EventsContent() {
+interface EventsPageProps {
+  searchParams: Promise<{ search?: string; status?: string }>;
+}
+
+async function EventsContent({ searchParams }: EventsPageProps) {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
 
@@ -23,10 +28,15 @@ async function EventsContent() {
     redirect("/auth/login");
   }
 
+  const { search, status } = await searchParams;
+
   const [hostedResult, participatingResult, allResult] = await Promise.all([
     getMyHostedEvents(),
     getMyParticipatingEvents(),
-    getAllEvents(),
+    getAllEvents({
+      search: search || undefined,
+      status: status || undefined,
+    }),
   ]);
 
   const hostedEvents = "data" in hostedResult ? hostedResult.data : [];
@@ -80,11 +90,17 @@ async function EventsContent() {
 
         {/* 전체 이벤트 */}
         <TabsContent value="all" className="mt-4">
+          {/* 검색/필터 UI */}
+          <Suspense>
+            <EventFilter />
+          </Suspense>
           {allEvents.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-14 text-center">
               <span className="text-3xl">📅</span>
               <p className="text-sm font-medium text-muted-foreground">
-                진행 중인 이벤트가 없습니다.
+                {search || status
+                  ? "조건에 맞는 이벤트가 없습니다."
+                  : "진행 중인 이벤트가 없습니다."}
               </p>
             </div>
           ) : (
@@ -94,6 +110,7 @@ async function EventsContent() {
                   key={event.id}
                   event={event}
                   participantCount={event.participantCount}
+                  myRole={event.myRole}
                   href={`/invite/${event.invite_code}`}
                 />
               ))}
@@ -144,10 +161,10 @@ async function EventsContent() {
   );
 }
 
-export default function EventsPage() {
+export default function EventsPage({ searchParams }: EventsPageProps) {
   return (
     <Suspense>
-      <EventsContent />
+      <EventsContent searchParams={searchParams} />
     </Suspense>
   );
 }

@@ -41,10 +41,16 @@ function getGradient(title: string): string {
 interface EventCardProps {
   event: Event;
   participantCount?: number;
+  myRole?: "host" | "participant" | null;
   href?: string;
 }
 
-export function EventCard({ event, participantCount, href }: EventCardProps) {
+export function EventCard({
+  event,
+  participantCount,
+  myRole,
+  href,
+}: EventCardProps) {
   const formattedDate = new Date(event.event_date).toLocaleDateString("ko-KR", {
     month: "short",
     day: "numeric",
@@ -75,6 +81,14 @@ export function EventCard({ event, participantCount, href }: EventCardProps) {
               <span className="select-none text-5xl font-bold text-white/80 drop-shadow-sm">
                 {event.title.charAt(0)}
               </span>
+            </div>
+          )}
+          {/* 역할 배지 (좌측 상단) */}
+          {myRole && (
+            <div className="absolute left-2.5 top-2.5">
+              <Badge variant="secondary" className="text-xs shadow-sm">
+                {myRole === "host" ? "주최" : "참여 중"}
+              </Badge>
             </div>
           )}
           {/* 상태 뱃지 오버레이 */}
