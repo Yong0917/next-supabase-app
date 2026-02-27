@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { deleteComment } from "@/app/(protected)/events/[id]/announcements/actions";
+import { useActionToast } from "@/lib/hooks/use-action-toast";
 import { Button } from "@/components/ui/button";
 
 interface DeleteCommentButtonProps {
@@ -16,6 +17,7 @@ export function DeleteCommentButton({
   announcementId,
 }: DeleteCommentButtonProps) {
   const router = useRouter();
+  const { handleResult } = useActionToast();
   const [isPending, setIsPending] = useState(false);
 
   const handleDelete = async () => {
@@ -26,9 +28,8 @@ export function DeleteCommentButton({
     const result = await deleteComment(commentId);
     setIsPending(false);
 
-    if ("error" in result) {
-      alert(result.error);
-    } else {
+    handleResult(result, "댓글이 삭제되었습니다.");
+    if ("success" in result) {
       // 댓글 목록 갱신
       router.refresh();
     }

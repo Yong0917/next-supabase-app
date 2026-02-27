@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { cancelEvent } from "@/app/(protected)/events/actions";
+import { useActionToast } from "@/lib/hooks/use-action-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,7 @@ interface CancelEventButtonProps {
 
 export function CancelEventButton({ eventId }: CancelEventButtonProps) {
   const router = useRouter();
+  const { handleResult } = useActionToast();
   const [isPending, setIsPending] = useState(false);
 
   const handleCancel = async () => {
@@ -30,9 +32,8 @@ export function CancelEventButton({ eventId }: CancelEventButtonProps) {
     const result = await cancelEvent(eventId);
     setIsPending(false);
 
-    if ("error" in result) {
-      alert(result.error);
-    } else {
+    handleResult(result, "이벤트가 취소되었습니다.");
+    if ("success" in result) {
       router.refresh();
     }
   };

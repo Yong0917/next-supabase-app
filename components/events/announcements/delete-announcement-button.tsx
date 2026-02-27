@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { deleteAnnouncement } from "@/app/(protected)/events/[id]/announcements/actions";
+import { useActionToast } from "@/lib/hooks/use-action-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +28,7 @@ export function DeleteAnnouncementButton({
   eventId,
 }: DeleteAnnouncementButtonProps) {
   const router = useRouter();
+  const { handleResult } = useActionToast();
   const [isPending, setIsPending] = useState(false);
 
   const handleDelete = async () => {
@@ -34,9 +36,8 @@ export function DeleteAnnouncementButton({
     const result = await deleteAnnouncement(announcementId);
     setIsPending(false);
 
-    if ("error" in result) {
-      alert(result.error);
-    } else {
+    handleResult(result, "공지가 삭제되었습니다.");
+    if ("success" in result) {
       // 공지 목록 페이지로 이동
       router.push(`/events/${eventId}/announcements`);
     }

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { cancelParticipation } from "@/app/(protected)/events/actions";
+import { useActionToast } from "@/lib/hooks/use-action-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +26,7 @@ export function CancelParticipationButton({
   eventId,
 }: CancelParticipationButtonProps) {
   const router = useRouter();
+  const { handleResult } = useActionToast();
   const [isPending, setIsPending] = useState(false);
 
   const handleCancel = async () => {
@@ -32,9 +34,8 @@ export function CancelParticipationButton({
     const result = await cancelParticipation(eventId);
     setIsPending(false);
 
-    if ("error" in result) {
-      alert(result.error);
-    } else {
+    handleResult(result, "참여가 취소되었습니다.");
+    if ("success" in result) {
       router.refresh();
     }
   };
