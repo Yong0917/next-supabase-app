@@ -86,23 +86,29 @@ export type Database = {
       }
       event_participants: {
         Row: {
+          attended: boolean
           event_id: string
           id: string
           joined_at: string
+          rejection_reason: string | null
           status: Database["public"]["Enums"]["participant_status"]
           user_id: string
         }
         Insert: {
+          attended?: boolean
           event_id: string
           id?: string
           joined_at?: string
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["participant_status"]
           user_id: string
         }
         Update: {
+          attended?: boolean
           event_id?: string
           id?: string
           joined_at?: string
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["participant_status"]
           user_id?: string
         }
@@ -202,7 +208,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_emails: {
+        Args: { user_ids: string[] }
+        Returns: {
+          email: string
+          id: string
+        }[]
+      }
     }
     Enums: {
       event_status: "active" | "cancelled" | "completed"

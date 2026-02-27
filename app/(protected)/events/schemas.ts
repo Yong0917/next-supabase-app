@@ -51,6 +51,8 @@ export type ParticipantWithProfile = {
   userId: string;
   status: ParticipantStatus;
   joinedAt: string;
+  attended: boolean;
+  rejection_reason: string | null;
   profile: Pick<Profile, "id" | "username" | "full_name" | "avatar_url"> | null;
   email: string | null;
 };
@@ -67,5 +69,6 @@ export type InviteEventData = {
   status: EventStatus;
   cover_image_url: string | null;
   invite_code: string;
+  host_id: string;
   participantCount: number;
 };
