@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { deleteEventImageServer } from "@/lib/supabase/storage-server";
 import type { Event, ParticipantStatus, Profile } from "@/lib/types";
 
 import {
@@ -15,8 +16,11 @@ import {
   type ParticipantWithProfile,
 } from "./schemas";
 
-// 전체 이벤트 (참여자 수 포함) 타입
-export type PublicEventWithCount = Event & { participantCount: number };
+// 전체 이벤트 (참여자 수 + 내 역할 포함) 타입
+export type PublicEventWithCount = Event & {
+  participantCount: number;
+  myRole: "host" | "participant" | null;
+};
 
 // 이벤트 생성
 export async function createEvent(
@@ -64,6 +68,10 @@ export async function createEvent(
     .single();
 
   if (insertError || !insertedEvent) {
+    // INSERT 실패 시 업로드된 이미지 고아 파일 정리
+    if (cover_image_url) {
+      await deleteEventImageServer(cover_image_url).catch(console.error);
+    }
     return { error: "이벤트 생성에 실패했습니다. 다시 시도해주세요." };
   }
 
@@ -221,10 +229,11 @@ export async function getMyParticipatingEvents(): Promise<
   return { data: participants as ParticipatingEvent[] };
 }
 
-// 전체 공개 이벤트 목록 조회 (참여자 수 포함)
-export async function getAllEvents(): Promise<
-  { data: PublicEventWithCount[] } | { error: string }
-> {
+// 전체 공개 이벤트 목록 조회 (참여자 수 포함, 필터 옵션 지원)
+export async function getAllEvents(options?: {
+  search?: string;
+  status?: string;
+}): Promise<{ data: PublicEventWithCount[] } | { error: string }> {
   const supabase = await createClient();
   const { data, error: authError } = await supabase.auth.getClaims();
 
@@ -232,11 +241,25 @@ export async function getAllEvents(): Promise<
     return { error: "인증이 필요합니다." };
   }
 
-  const { data: events, error } = await supabase
-    .from("events")
-    .select("*")
-    .eq("status", "active")
-    .order("event_date", { ascending: true });
+  const userId = data.claims.sub;
+
+  let query = supabase.from("events").select("*");
+
+  // 상태 필터: 지정 없으면 active만 조회
+  if (options?.status && options.status !== "all") {
+    query = query.eq("status", options.status);
+  } else if (!options?.status) {
+    query = query.eq("status", "active");
+  }
+
+  // 검색어 필터: 제목 부분 일치
+  if (options?.search) {
+    query = query.ilike("title", `%${options.search}%`);
+  }
+
+  const { data: events, error } = await query.order("event_date", {
+    ascending: true,
+  });
 
   if (error) {
     return { error: "이벤트 목록을 불러오는 데 실패했습니다." };
@@ -246,25 +269,49 @@ export async function getAllEvents(): Promise<
     return { data: [] };
   }
 
-  // 한 번의 쿼리로 모든 이벤트의 승인된 참여자 수 조회
   const eventIds = events.map((e) => e.id);
-  const { data: participants } = await supabase
-    .from("event_participants")
-    .select("event_id")
-    .in("event_id", eventIds)
-    .eq("status", "approved");
+
+  // 한 번의 쿼리로 모든 이벤트의 승인된 참여자 수 + 내 참여 기록 조회
+  const [participantsResult, myParticipationsResult] = await Promise.all([
+    supabase
+      .from("event_participants")
+      .select("event_id")
+      .in("event_id", eventIds)
+      .eq("status", "approved"),
+    supabase
+      .from("event_participants")
+      .select("event_id, status")
+      .in("event_id", eventIds)
+      .eq("user_id", userId)
+      .not("status", "in", '("cancelled","rejected")'),
+  ]);
 
   // 이벤트별 참여자 수 집계
   const countMap = new Map<string, number>();
-  for (const { event_id } of participants ?? []) {
+  for (const { event_id } of participantsResult.data ?? []) {
     countMap.set(event_id, (countMap.get(event_id) ?? 0) + 1);
   }
 
+  // 내가 참여 중인 이벤트 ID 집합
+  const myParticipationSet = new Set(
+    (myParticipationsResult.data ?? []).map((p) => p.event_id),
+  );
+
   return {
-    data: events.map((event) => ({
-      ...event,
-      participantCount: countMap.get(event.id) ?? 0,
-    })),
+    data: events.map((event) => {
+      let myRole: "host" | "participant" | null = null;
+      if (event.host_id === userId) {
+        myRole = "host";
+      } else if (myParticipationSet.has(event.id)) {
+        myRole = "participant";
+      }
+
+      return {
+        ...event,
+        participantCount: countMap.get(event.id) ?? 0,
+        myRole,
+      };
+    }),
   };
 }
 
@@ -277,7 +324,7 @@ export async function getEventByInviteCode(
   const { data: event, error } = await supabase
     .from("events")
     .select(
-      "id, title, description, location, event_date, max_capacity, join_policy, status, cover_image_url, invite_code",
+      "id, title, description, location, event_date, max_capacity, join_policy, status, cover_image_url, invite_code, host_id",
     )
     .eq("invite_code", inviteCode)
     .single();
@@ -323,8 +370,8 @@ export async function joinEvent(
     return { error: "유효하지 않은 초대 코드입니다." };
   }
 
-  if (event.status === "cancelled") {
-    return { error: "취소된 이벤트입니다." };
+  if (event.status !== "active") {
+    return { error: "진행 중인 이벤트가 아닙니다." };
   }
 
   // 주최자 본인 신청 방지
@@ -399,6 +446,22 @@ export async function cancelParticipation(
   }
 
   const userId = authData.claims.sub;
+
+  // 기존 참여 상태 확인
+  const { data: existing } = await supabase
+    .from("event_participants")
+    .select("status")
+    .eq("event_id", eventId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (!existing) {
+    return { error: "참여 기록을 찾을 수 없습니다." };
+  }
+
+  if (existing.status === "cancelled") {
+    return { error: "이미 취소된 참여입니다." };
+  }
 
   const { error: updateError } = await supabase
     .from("event_participants")
@@ -500,10 +563,10 @@ export async function getParticipantsByEvent(
     return { error: "권한이 없습니다." };
   }
 
-  // 참여자 목록 조회
+  // 참여자 목록 조회 (출석 여부, 거절 사유 포함)
   const { data: participants, error: participantsError } = await supabase
     .from("event_participants")
-    .select("id, user_id, status, joined_at")
+    .select("id, user_id, status, joined_at, attended, rejection_reason")
     .eq("event_id", eventId)
     .order("joined_at", { ascending: true });
 
@@ -551,11 +614,57 @@ export async function getParticipantsByEvent(
     userId: p.user_id,
     status: p.status,
     joinedAt: p.joined_at,
+    attended: p.attended,
+    rejection_reason: p.rejection_reason,
     profile: profileMap.get(p.user_id) ?? null,
     email: emailMap.get(p.user_id) ?? null,
   }));
 
   return { data: result };
+}
+
+// 참여자 출석 체크 토글 (주최자 전용)
+export async function toggleAttendance(
+  participantId: string,
+  eventId: string,
+  attended: boolean,
+): Promise<{ error: string } | { success: true }> {
+  const supabase = await createClient();
+  const { data: authData, error: authError } = await supabase.auth.getClaims();
+
+  if (authError || !authData?.claims) {
+    return { error: "인증이 필요합니다." };
+  }
+
+  const userId = authData.claims.sub;
+
+  // 이벤트 조회 및 주최자 검증
+  const { data: event, error: eventError } = await supabase
+    .from("events")
+    .select("host_id")
+    .eq("id", eventId)
+    .single();
+
+  if (eventError || !event) {
+    return { error: "이벤트를 찾을 수 없습니다." };
+  }
+
+  if (event.host_id !== userId) {
+    return { error: "권한이 없습니다." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("event_participants")
+    .update({ attended })
+    .eq("id", participantId);
+
+  if (updateError) {
+    return { error: "출석 처리에 실패했습니다. 다시 시도해주세요." };
+  }
+
+  revalidatePath(`/events/${eventId}/manage`);
+
+  return { success: true };
 }
 
 // 참여자 승인 (주최자 전용, 정원 초과 시 에러)
@@ -587,6 +696,21 @@ export async function approveParticipant(
     return { error: "권한이 없습니다." };
   }
 
+  // 현재 participant 상태 조회 (이중 처리 방지)
+  const { data: participant, error: participantError } = await supabase
+    .from("event_participants")
+    .select("status")
+    .eq("id", participantId)
+    .single();
+
+  if (participantError || !participant) {
+    return { error: "참여자를 찾을 수 없습니다." };
+  }
+
+  if (participant.status !== "pending") {
+    return { error: "이미 처리된 신청입니다." };
+  }
+
   // 정원 초과 여부 확인 (max_capacity가 설정된 경우에만)
   if (event.max_capacity !== null) {
     const { count: approvedCount } = await supabase
@@ -616,10 +740,11 @@ export async function approveParticipant(
   return { success: true };
 }
 
-// 참여자 거절 (주최자 전용)
+// 참여자 거절 (주최자 전용, 거절 사유 선택)
 export async function rejectParticipant(
   participantId: string,
   eventId: string,
+  reason?: string,
 ): Promise<{ error: string } | { success: true }> {
   const supabase = await createClient();
   const { data: authData, error: authError } = await supabase.auth.getClaims();
@@ -645,10 +770,25 @@ export async function rejectParticipant(
     return { error: "권한이 없습니다." };
   }
 
-  // 상태를 rejected로 변경
+  // 현재 participant 상태 조회 (이중 처리 방지)
+  const { data: rejectTarget, error: rejectTargetError } = await supabase
+    .from("event_participants")
+    .select("status")
+    .eq("id", participantId)
+    .single();
+
+  if (rejectTargetError || !rejectTarget) {
+    return { error: "참여자를 찾을 수 없습니다." };
+  }
+
+  if (rejectTarget.status !== "pending") {
+    return { error: "이미 처리된 신청입니다." };
+  }
+
+  // 상태를 rejected로 변경 (거절 사유 포함)
   const { error: updateError } = await supabase
     .from("event_participants")
-    .update({ status: "rejected" })
+    .update({ status: "rejected", rejection_reason: reason ?? null })
     .eq("id", participantId);
 
   if (updateError) {
