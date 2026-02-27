@@ -84,6 +84,9 @@ export default async function EventDetailPage({
             <Button variant="outline" asChild>
               <Link href={`/events/${event.id}/edit`}>수정</Link>
             </Button>
+            <Button variant="outline" asChild>
+              <Link href={`/events/new?from=${event.id}`}>복제</Link>
+            </Button>
             <CancelEventButton eventId={event.id} />
           </div>
         )}
