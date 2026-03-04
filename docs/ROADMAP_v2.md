@@ -1,7 +1,7 @@
 # 모임 매니저 v2 개발 로드맵
 
-> 마지막 업데이트: 2026-02-27
-> 버전: v2.3
+> 마지막 업데이트: 2026-03-01
+> 버전: v2.4
 
 ## 프로젝트 개요
 
@@ -357,6 +357,7 @@ Phase 1 (버그 수정)
 
 | 버전 | 날짜       | 변경 내용                                                                                                                                                                                                                                                                 |
 | ---- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.4 | 2026-03-01 | Phase 1~3 전체 완료 확인. 마지막 업데이트 날짜 갱신. Phase 4 착수 대기 중.                                                                                                                                                                                                |
 | v2.3 | 2026-02-27 | Phase 2 완료 처리 (Sonner toast 설치, use-action-toast 훅 생성, ParticipantList/CancelEventButton/CancelParticipationButton alert() → toast 전환, getAllEvents myRole 반환, EventCard 역할 배지 추가, cancelParticipation 이미 취소된 참여 에러 처리, alert() 0건 확인)   |
 | v2.2 | 2026-02-27 | Phase 3 완료 처리 (DB migration: attended+rejection_reason 컬럼 추가, 타입 재생성, toggleAttendance/rejectParticipant(reason)/getAllEvents(filter) 서버 액션 추가/수정, EventFilter/RejectDialog 컴포넌트 신규 생성, ParticipantList 수정, 이벤트 복제 버튼+prefill 지원) |
 | v2.1 | 2026-02-26 | Phase 1 완료 처리 (invite 페이지 주최자 분기/HostActionPanel 신규 생성, joinEvent 상태 검증 강화, approveParticipant/rejectParticipant 이중 처리 방지, createEvent 이미지 롤백, storage-server.ts 신규 생성)                                                              |

@@ -1,236 +1,304 @@
 {
   "tasks": [
     {
-      "id": "03750460-05dc-4333-a8c2-4c0af6a24bc3",
-      "name": "이벤트 Server Actions 구현 (actions.ts)",
-      "description": "app/protected/events/actions.ts 파일을 생성하여 이벤트 관련 Server Action 6개와 Zod 스키마를 구현합니다.\n\n구현 함수:\n1. EventFormSchema (Zod): title(string, min 2), description(string optional), event_date(string, ISO date), event_time(string, HH:MM), location(string optional), max_capacity(number optional, positive), join_policy('open' | 'approval')\n2. createEvent(formData): getClaims → Zod 검증 → invite_code 생성 → INSERT → redirect('/protected/events/[id]')\n3. updateEvent(eventId, formData): getClaims → DB에서 event 조회 → host_id 검증 → Zod 검증 → UPDATE → redirect\n4. cancelEvent(eventId): getClaims → host_id 검증 → UPDATE status='cancelled' → revalidatePath\n5. getMyHostedEvents(userId): SELECT from events WHERE host_id=userId ORDER BY event_date DESC\n6. getMyParticipatingEvents(userId): SELECT from event_participants with events join WHERE user_id=userId\n7. getEventById(eventId): SELECT event + event_participants(user_id, status) → 현재 사용자 role('host'|'participant'|'none') 및 participantStatus 반환\n\ninvite_code 생성: crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()\nevent_date 조합: `${formData.event_date}T${formData.event_time}:00`",
-      "notes": "반환 타입: { data: T } | { error: string }. cancelEvent, createEvent는 성공 시 redirect. getEventById 반환: { event: Event, role: 'host'|'participant'|'none', participantStatus: string|null } | { error: string }",
+      "id": "a4849c1b-7443-4379-9c85-3166c96a042d",
+      "name": "DB migration: attended + rejection_reason 컬럼 추가",
+      "description": "event_participants 테이블에 attended boolean DEFAULT false 컬럼과 rejection_reason text DEFAULT NULL 컬럼을 한 번에 추가하는 Supabase migration 실행. 이후 모든 서버 액션 및 스키마 변경의 선행 조건.",
       "status": "completed",
       "dependencies": [],
-      "createdAt": "2026-02-25T05:44:55.384Z",
-      "updatedAt": "2026-02-25T05:47:36.446Z",
-      "relatedFiles": [
-        {
-          "path": "app/protected/events/actions.ts",
-          "type": "CREATE",
-          "description": "이벤트 Server Actions 파일"
-        },
-        {
-          "path": "lib/supabase/server.ts",
-          "type": "REFERENCE",
-          "description": "서버 클라이언트 createClient() 패턴"
-        },
-        {
-          "path": "lib/types/index.ts",
-          "type": "REFERENCE",
-          "description": "Event, EventInsert, EventUpdate, JoinPolicy, EventStatus, EventParticipant 편의 타입"
-        },
-        {
-          "path": "shrimp-rules.md",
-          "type": "REFERENCE",
-          "description": "Server Action 구현 규칙 및 인증 패턴"
-        }
-      ],
-      "implementationGuide": "1. 'use server' 선언\n2. import: createClient from @/lib/supabase/server, redirect from next/navigation, revalidatePath from next/cache, z from zod, Event/EventInsert/JoinPolicy from @/lib/types\n3. EventFormSchema 정의 (z.object)\n4. createEvent 구현:\n   - const supabase = await createClient()\n   - const { data, error } = await supabase.auth.getClaims()\n   - if (!data?.claims) return { error: '인증이 필요합니다.' }\n   - const userId = data.claims.sub\n   - const validated = EventFormSchema.safeParse(rawData) → if (!validated.success) return { error }\n   - invite_code = crypto.randomUUID().replace(/-/g,'').slice(0,8).toUpperCase()\n   - event_date = `${validated.data.event_date}T${validated.data.event_time}:00`\n   - supabase.from('events').insert({ ...validated.data, host_id: userId, invite_code, event_date })\n   - redirect('/protected/events/' + insertedId)\n5. updateEvent, cancelEvent: 동일 인증 패턴, host_id 검증 후 UPDATE\n6. getMyHostedEvents, getMyParticipatingEvents: 인증 후 SELECT\n7. getEventById: SELECT * from events + event_participants WHERE event_id=id → 사용자 role 판단",
-      "verificationCriteria": "1. TypeScript 컴파일 오류 없음 (npm run type-check)\n2. ESLint 오류 없음 (npm run lint)\n3. 각 함수가 getClaims() 호출 후 userId 추출\n4. createEvent에서 invite_code가 8자리 대문자 영숫자로 생성됨\n5. updateEvent/cancelEvent에서 host_id !== userId 시 error 반환",
-      "analysisResult": "Phase 1 이벤트 CRUD 구현. 기술 스택: Next.js 15 App Router + Supabase + React Hook Form + Zod + shadcn/ui. 모든 Server Action은 createClient() → getClaims() → 권한 검증 → Zod 검증 → DB 작업 순서 필수. 컴포넌트는 Server/Client 역할 명확히 구분. lib/types/index.ts의 편의 타입 활용. npm run validate (type-check + lint + format:check) 통과 필수.",
-      "summary": "app/protected/events/actions.ts 생성 완료. EventFormSchema(Zod v4 API 준수), createEvent(invite_code 8자리 생성 + redirect), updateEvent(host_id 검증 + redirect), cancelEvent(revalidatePath), getMyHostedEvents, getMyParticipatingEvents, getEventById(role/participantStatus/participantCount 반환) 구현. TypeScript 타입 오류 0건, ESLint 오류 0건 확인.",
-      "completedAt": "2026-02-25T05:47:36.444Z"
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:46:04.857Z",
+      "relatedFiles": [],
+      "implementationGuide": "mcp__supabase__apply_migration 도구 사용.\nSQL: ALTER TABLE event_participants ADD COLUMN attended boolean NOT NULL DEFAULT false, ADD COLUMN rejection_reason text DEFAULT NULL;\nRLS 정책 확인: UPDATE는 host만 가능(기존 정책 확인 후 필요시 업데이트 정책에 attended, rejection_reason 컬럼 포함).",
+      "verificationCriteria": "Supabase 테이블에 attended(boolean, NOT NULL, DEFAULT false)와 rejection_reason(text, nullable) 컬럼이 존재하는지 list_tables로 확인",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "event_participants 테이블에 attended(boolean, NOT NULL, DEFAULT false)와 rejection_reason(text, nullable) 컬럼이 성공적으로 추가됨.",
+      "completedAt": "2026-02-27T00:46:04.856Z"
     },
     {
-      "id": "ff0eed6d-aed5-4f37-8fbb-c727e5e6d31e",
-      "name": "EventCard 및 InviteCodeDisplay 컴포넌트 구현",
-      "description": "이벤트 목록 카드와 초대 코드 복사 UI 컴포넌트를 구현합니다.\n\n1. components/events/event-card.tsx (Server Component)\n   - Props: { event: Event, participantCount?: number }\n   - shadcn/ui Card 사용: CardHeader(제목, 상태 배지), CardContent(날짜/장소/인원)\n   - Badge: active='default', cancelled='destructive', completed='secondary'\n   - Link로 /protected/events/[id] 이동\n\n2. components/events/invite-code-display.tsx (Client Component)\n   - Props: { inviteCode: string }\n   - 초대 코드 표시 + 복사 버튼 (Copy 아이콘, lucide-react)\n   - navigator.clipboard.writeText() 호출\n   - 복사 완료 시 useState로 '복사됨!' 피드백 (2초 후 원복)",
+      "id": "f17c4261-10e2-4f9c-bfc6-d820816466dc",
+      "name": "TypeScript 타입 재생성",
+      "description": "DB migration 완료 후 npx supabase gen types typescript 명령으로 lib/types/database.ts를 재생성하여 attended, rejection_reason 컬럼 타입 갱신.",
       "status": "completed",
       "dependencies": [
         {
-          "taskId": "03750460-05dc-4333-a8c2-4c0af6a24bc3"
+          "taskId": "a4849c1b-7443-4379-9c85-3166c96a042d"
         }
       ],
-      "createdAt": "2026-02-25T05:44:55.384Z",
-      "updatedAt": "2026-02-25T05:51:19.577Z",
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:47:15.632Z",
       "relatedFiles": [
         {
-          "path": "components/events/event-card.tsx",
-          "type": "CREATE",
-          "description": "이벤트 카드 컴포넌트"
-        },
-        {
-          "path": "components/events/invite-code-display.tsx",
-          "type": "CREATE",
-          "description": "초대 코드 복사 UI 컴포넌트"
-        },
-        {
-          "path": "lib/types/index.ts",
-          "type": "REFERENCE",
-          "description": "Event 타입"
-        }
-      ],
-      "implementationGuide": "event-card.tsx:\n- import: Card, CardHeader, CardTitle, CardContent from @/components/ui/card, Badge, Link from next/link, Event from @/lib/types\n- 날짜 포맷: new Date(event.event_date).toLocaleDateString('ko-KR')\n- 상태별 Badge variant 매핑\n\ninvite-code-display.tsx:\n- 'use client' 선언\n- import: useState from react, Copy/Check icon from lucide-react, Button\n- const [copied, setCopied] = useState(false)\n- handleCopy: navigator.clipboard.writeText(inviteCode) → setCopied(true) → setTimeout(setCopied(false), 2000)\n- UI: 코드 표시(monospace font) + Button(아이콘 전환)",
-      "verificationCriteria": "1. EventCard가 상태별로 올바른 Badge variant 렌더\n2. InviteCodeDisplay에서 복사 버튼 클릭 시 클립보드에 코드 복사\n3. 복사 완료 후 2초 이내 버튼 텍스트/아이콘 복귀\n4. TypeScript 및 ESLint 오류 없음",
-      "analysisResult": "Phase 1 이벤트 CRUD 구현. 기술 스택: Next.js 15 App Router + Supabase + React Hook Form + Zod + shadcn/ui. 모든 Server Action은 createClient() → getClaims() → 권한 검증 → Zod 검증 → DB 작업 순서 필수. 컴포넌트는 Server/Client 역할 명확히 구분. lib/types/index.ts의 편의 타입 활용. npm run validate (type-check + lint + format:check) 통과 필수.",
-      "summary": "event-card.tsx(Server Component): 상태별 Badge variant 매핑, 날짜 한국어 포맷, Link 감싸기 구현. invite-code-display.tsx(Client Component): navigator.clipboard.writeText, useState로 2초 복사 피드백, Copy/Check 아이콘 전환 구현. TypeScript 0건, ESLint 0건 확인.",
-      "completedAt": "2026-02-25T05:51:19.573Z"
-    },
-    {
-      "id": "b61b250a-e489-4b62-81c9-d4a43f79c7fb",
-      "name": "EventForm 컴포넌트 구현",
-      "description": "이벤트 생성/수정에 공용으로 사용되는 폼 컴포넌트를 구현합니다. Client Component로, React Hook Form + Zod 기반.\n\nProps:\n- defaultValues?: Partial<EventFormValues> (수정 시 기존 데이터)\n- action: (formData: EventFormValues) => Promise<{ error?: string }> (Server Action)\n- submitLabel?: string (기본값: '저장')\n\n필드:\n- title: Input (필수)\n- description: Textarea (선택)\n- event_date: Input type='date' (필수)\n- event_time: Input type='time' (필수)\n- location: Input (선택)\n- max_capacity: Input type='number' (선택, 최소 1)\n- join_policy: RadioGroup ('open': 즉시 참여, 'approval': 승인 후 참여)\n\n동작:\n- useActionState 또는 RHF handleSubmit + startTransition으로 Server Action 호출\n- 에러 메시지 표시\n- 제출 중 버튼 비활성화",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "03750460-05dc-4333-a8c2-4c0af6a24bc3"
-        }
-      ],
-      "createdAt": "2026-02-25T05:44:55.384Z",
-      "updatedAt": "2026-02-25T05:51:26.523Z",
-      "relatedFiles": [
-        {
-          "path": "components/events/event-form.tsx",
-          "type": "CREATE",
-          "description": "이벤트 생성/수정 공용 폼 컴포넌트"
-        },
-        {
-          "path": "app/protected/events/actions.ts",
-          "type": "REFERENCE",
-          "description": "EventFormSchema import, Server Action 타입 참조"
-        }
-      ],
-      "implementationGuide": "'use client' 선언\nimport: useForm from react-hook-form, zodResolver from @hookform/resolvers/zod, z from zod\nimport: Input, Textarea, Button, RadioGroup, RadioGroupItem, Label\nimport: EventFormSchema를 actions.ts에서 export하여 재사용\n\nconst form = useForm({ resolver: zodResolver(EventFormSchema), defaultValues })\n\nonSubmit: form.handleSubmit(async (data) => { const result = await action(data); if (result?.error) setError(result.error) })\n\nForm 렌더: shadcn/ui 컴포넌트로 각 필드 구현\njoin_policy: RadioGroup으로 'open'/'approval' 선택\n제출 버튼: form.formState.isSubmitting 시 disabled",
-      "verificationCriteria": "1. 생성 모드(defaultValues 없음)와 수정 모드(defaultValues 있음) 모두 정상 동작\n2. Zod 검증 실패 시 각 필드 아래 에러 메시지 표시\n3. Server Action 에러 반환 시 폼 상단에 에러 메시지 표시\n4. 제출 중 버튼 비활성화\n5. TypeScript 및 ESLint 오류 없음",
-      "analysisResult": "Phase 1 이벤트 CRUD 구현. 기술 스택: Next.js 15 App Router + Supabase + React Hook Form + Zod + shadcn/ui. 모든 Server Action은 createClient() → getClaims() → 권한 검증 → Zod 검증 → DB 작업 순서 필수. 컴포넌트는 Server/Client 역할 명확히 구분. lib/types/index.ts의 편의 타입 활용. npm run validate (type-check + lint + format:check) 통과 필수.",
-      "summary": "event-form.tsx(Client Component): React Hook Form + Zod v4 zodResolver 연동, 생성/수정 공용 defaultValues prop, RadioGroup으로 join_policy 선택, setValueAs로 빈 max_capacity를 undefined 처리. 서버 에러 표시, 제출 중 버튼 비활성화 구현. TypeScript 0건, ESLint 0건 확인. zodResolver의 Zod v4 타입 불일치는 as any + eslint-disable 처리.",
-      "completedAt": "2026-02-25T05:51:26.523Z"
-    },
-    {
-      "id": "11752d37-3982-4e3b-a121-bc71bdd4d377",
-      "name": "이벤트 목록 및 생성 페이지 구현",
-      "description": "내 이벤트 목록 페이지와 이벤트 생성 페이지를 구현합니다.\n\n1. app/protected/events/page.tsx (Server Component)\n   - getMyHostedEvents, getMyParticipatingEvents 호출\n   - shadcn/ui Tabs: '주최한 이벤트' / '참여한 이벤트' 탭\n   - 각 탭에 EventCard 목록 렌더\n   - 빈 상태: '이벤트가 없습니다' 안내 + 새 이벤트 만들기 링크\n   - 우상단: '새 이벤트 만들기' Button(Link)\n\n2. app/protected/events/new/page.tsx (Server Component 래퍼)\n   - 인증 확인 (getClaims)\n   - EventForm 렌더\n   - createEvent Server Action 전달",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "03750460-05dc-4333-a8c2-4c0af6a24bc3"
-        },
-        {
-          "taskId": "ff0eed6d-aed5-4f37-8fbb-c727e5e6d31e"
-        },
-        {
-          "taskId": "b61b250a-e489-4b62-81c9-d4a43f79c7fb"
-        }
-      ],
-      "createdAt": "2026-02-25T05:44:55.384Z",
-      "updatedAt": "2026-02-25T05:52:52.827Z",
-      "relatedFiles": [
-        {
-          "path": "app/protected/events/page.tsx",
-          "type": "CREATE",
-          "description": "내 이벤트 목록 페이지"
-        },
-        {
-          "path": "app/protected/events/new/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 생성 페이지"
-        },
-        {
-          "path": "app/protected/events/actions.ts",
-          "type": "DEPENDENCY",
-          "description": "getMyHostedEvents, getMyParticipatingEvents, createEvent"
-        },
-        {
-          "path": "components/events/event-card.tsx",
-          "type": "DEPENDENCY",
-          "description": "EventCard 컴포넌트"
-        },
-        {
-          "path": "components/events/event-form.tsx",
-          "type": "DEPENDENCY",
-          "description": "EventForm 컴포넌트"
-        }
-      ],
-      "implementationGuide": "events/page.tsx:\n- import: getMyHostedEvents, getMyParticipatingEvents from ./actions\n- import: Tabs, TabsContent, TabsList, TabsTrigger from @/components/ui/tabs\n- import: EventCard from @/components/events/event-card\n- import: Button from @/components/ui/button, Link from next/link\n- Server Component: await createClient() → getClaims() → userId 추출\n- const [hostedEvents, participatingEvents] = await Promise.all([getMyHostedEvents(userId), getMyParticipatingEvents(userId)])\n- Tabs 렌더 (TabsList에 TabsTrigger 2개, TabsContent 2개)\n\nevents/new/page.tsx:\n- Server Component\n- import: EventForm from @/components/events/event-form\n- import: createEvent from ../actions\n- 인증 확인 후 EventForm 렌더: <EventForm action={createEvent} submitLabel='이벤트 만들기' />",
-      "verificationCriteria": "1. /protected/events 접근 시 주최/참여 탭 표시\n2. 각 탭에 해당하는 이벤트 카드 목록 렌더\n3. 이벤트 없을 때 빈 상태 메시지 표시\n4. /protected/events/new 접근 시 이벤트 생성 폼 표시\n5. 생성 성공 시 이벤트 상세 페이지로 이동\n6. TypeScript 및 ESLint 오류 없음",
-      "analysisResult": "Phase 1 이벤트 CRUD 구현. 기술 스택: Next.js 15 App Router + Supabase + React Hook Form + Zod + shadcn/ui. 모든 Server Action은 createClient() → getClaims() → 권한 검증 → Zod 검증 → DB 작업 순서 필수. 컴포넌트는 Server/Client 역할 명확히 구분. lib/types/index.ts의 편의 타입 활용. npm run validate (type-check + lint + format:check) 통과 필수.",
-      "summary": "events/page.tsx: getClaims 인증, Promise.all로 병렬 조회, shadcn/ui Tabs로 주최/참여 탭 구분, 빈 상태 메시지+링크, 이벤트 카운트 표시. events/new/page.tsx: 인증 확인 후 EventForm 렌더, createEvent 액션 연결. TypeScript 0건, ESLint 0건.",
-      "completedAt": "2026-02-25T05:52:52.826Z"
-    },
-    {
-      "id": "71a4c203-cf17-4cbe-9a09-aed7244bdd9e",
-      "name": "이벤트 상세 및 수정 페이지 구현",
-      "description": "이벤트 상세 페이지와 수정 페이지를 구현합니다.\n\n1. app/protected/events/[id]/page.tsx (Server Component)\n   - getEventById(id) 호출 → 없으면 notFound()\n   - 역할 기반 조건부 UI:\n     - 주최자(role='host'): 수정 버튼, 취소 버튼(AlertDialog), InviteCodeDisplay\n     - 승인 참여자(participantStatus='approved'): 참여 취소 버튼\n     - 대기 참여자(participantStatus='pending'): '승인 대기 중' 표시\n     - 미참여(role='none'): 참여 신청 안내\n   - 이벤트 기본 정보 표시: 제목, 날짜/시간, 장소, 최대인원, 참여방식\n\n2. app/protected/events/[id]/edit/page.tsx (Server Component)\n   - getEventById(id) 호출 → role !== 'host' 이면 redirect('/protected/events/[id]')\n   - event_date를 date + time으로 분리하여 defaultValues 구성\n   - EventForm에 defaultValues + updateEvent(bound id) 전달",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "03750460-05dc-4333-a8c2-4c0af6a24bc3"
-        },
-        {
-          "taskId": "ff0eed6d-aed5-4f37-8fbb-c727e5e6d31e"
-        },
-        {
-          "taskId": "b61b250a-e489-4b62-81c9-d4a43f79c7fb"
-        }
-      ],
-      "createdAt": "2026-02-25T05:44:55.384Z",
-      "updatedAt": "2026-02-25T05:52:59.450Z",
-      "relatedFiles": [
-        {
-          "path": "app/protected/events/[id]/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 상세 페이지"
-        },
-        {
-          "path": "app/protected/events/[id]/edit/page.tsx",
-          "type": "CREATE",
-          "description": "이벤트 수정 페이지"
-        },
-        {
-          "path": "app/protected/events/actions.ts",
-          "type": "DEPENDENCY",
-          "description": "getEventById, cancelEvent, updateEvent"
-        },
-        {
-          "path": "components/events/invite-code-display.tsx",
-          "type": "DEPENDENCY",
-          "description": "InviteCodeDisplay"
-        },
-        {
-          "path": "components/events/event-form.tsx",
-          "type": "DEPENDENCY",
-          "description": "EventForm"
-        }
-      ],
-      "implementationGuide": "[id]/page.tsx:\n- import: notFound from next/navigation\n- import: getEventById from ../actions\n- import: InviteCodeDisplay from @/components/events/invite-code-display\n- import: cancelEvent from ../actions\n- import: AlertDialog 컴포넌트들\n- params: { id: string } → const result = await getEventById(params.id)\n- if (!result || 'error' in result) notFound()\n- const { event, role, participantStatus } = result\n- 조건부 렌더: {role === 'host' && <InviteCodeDisplay inviteCode={event.invite_code} />}\n- 취소 버튼: AlertDialog로 확인 후 cancelEvent(event.id) 호출 (Client Action Wrapper 필요)\n\n[id]/edit/page.tsx:\n- getEventById → role !== 'host' → redirect\n- event_date 파싱: const dateObj = new Date(event.event_date); date = dateObj.toISOString().slice(0,10); time = dateObj.toTimeString().slice(0,5)\n- const updateEventWithId = updateEvent.bind(null, event.id) (Server Action binding)\n- <EventForm defaultValues={{ ...event, event_date: date, event_time: time }} action={updateEventWithId} submitLabel='수정 완료' />",
-      "verificationCriteria": "1. /protected/events/[id] 접근 시 이벤트 정보 표시\n2. 주최자에게만 수정/취소 버튼 및 초대 코드 표시\n3. 취소 버튼 클릭 시 AlertDialog 확인 후 status='cancelled'로 변경\n4. /protected/events/[id]/edit 접근 시 기존 데이터 prefill\n5. 비주최자가 edit 페이지 접근 시 상세 페이지로 redirect\n6. 수정 완료 후 상세 페이지로 이동\n7. TypeScript 및 ESLint 오류 없음",
-      "analysisResult": "Phase 1 이벤트 CRUD 구현. 기술 스택: Next.js 15 App Router + Supabase + React Hook Form + Zod + shadcn/ui. 모든 Server Action은 createClient() → getClaims() → 권한 검증 → Zod 검증 → DB 작업 순서 필수. 컴포넌트는 Server/Client 역할 명확히 구분. lib/types/index.ts의 편의 타입 활용. npm run validate (type-check + lint + format:check) 통과 필수.",
-      "summary": "events/[id]/page.tsx: getEventById로 role/participantStatus 기반 조건부 UI(주최자-수정/취소/초대코드, 승인/대기/거절 배지), CancelEventButton Client 컴포넌트 분리(AlertDialog + router.refresh). events/[id]/edit/page.tsx: 비주최자 redirect, event_date 파싱, updateEvent.bind(null, id)로 Server Action 바인딩. TypeScript 0건, ESLint 0건.",
-      "completedAt": "2026-02-25T05:52:59.449Z"
-    },
-    {
-      "id": "0989894d-f232-4a8a-bfbf-de5935d30ce9",
-      "name": "레이아웃 네비게이션 업데이트 및 전체 검증",
-      "description": "protected 레이아웃의 네비게이션을 업데이트하고 전체 Phase 1 구현을 검증합니다.\n\n1. app/protected/layout.tsx 수정\n   - 기존 nav에 '내 이벤트' Link(/protected/events) 추가\n   - '새 이벤트 만들기' Link(/protected/events/new) 추가\n   - 로고 옆 또는 별도 nav 섹션에 배치\n\n2. 전체 검증\n   - npm run validate (type-check + lint + format:check) 실행\n   - 오류 발생 시 수정",
-      "status": "completed",
-      "dependencies": [
-        {
-          "taskId": "11752d37-3982-4e3b-a121-bc71bdd4d377"
-        },
-        {
-          "taskId": "71a4c203-cf17-4cbe-9a09-aed7244bdd9e"
-        }
-      ],
-      "createdAt": "2026-02-25T05:44:55.384Z",
-      "updatedAt": "2026-02-25T05:53:52.336Z",
-      "relatedFiles": [
-        {
-          "path": "app/protected/layout.tsx",
+          "path": "lib/types/database.ts",
           "type": "TO_MODIFY",
-          "description": "네비게이션 링크 추가"
+          "description": "Supabase 자동 생성 타입 파일 - attended, rejection_reason 컬럼 반영"
         }
       ],
-      "implementationGuide": "layout.tsx 수정:\n- 기존 구조: <div className='flex items-center gap-5'> <Link href='/'>Next.js Supabase Starter</Link> ... </div>\n- 수정: Link 옆에 이벤트 관련 링크 추가\n  <Link href='/protected/events'>내 이벤트</Link>\n  <Link href='/protected/events/new'>새 이벤트 만들기</Link>\n\n검증:\n- npm run type-check: TypeScript 오류 0건 확인\n- npm run lint: ESLint 오류 0건 확인\n- npm run format:check: Prettier 포맷 확인\n- 전체 사용자 여정 수동 확인:\n  1) 이벤트 생성 → 상세 페이지 이동 + 초대 코드 확인\n  2) 이벤트 목록에서 주최/참여 탭 확인\n  3) 수정 후 변경사항 반영 확인\n  4) 취소 후 상태 'cancelled' 표시 확인\n  5) 비주최자 edit 페이지 접근 시 redirect 확인",
-      "verificationCriteria": "1. npm run validate 통과 (타입 오류 0건, 린트 오류 0건, 포맷 오류 0건)\n2. 네비게이션에 '내 이벤트' 및 '새 이벤트 만들기' 링크 표시\n3. Phase 1 완료 기준 5개 모두 달성:\n   - 이벤트 생성 → 상세 페이지 이동 및 초대 코드 확인\n   - 이벤트 목록 주최/참여 탭 구분\n   - 이벤트 수정 후 변경 내용 반영\n   - 이벤트 취소 후 cancelled 상태 표시\n   - 비주최자 수정 페이지 접근 시 redirect 처리",
-      "analysisResult": "Phase 1 이벤트 CRUD 구현. 기술 스택: Next.js 15 App Router + Supabase + React Hook Form + Zod + shadcn/ui. 모든 Server Action은 createClient() → getClaims() → 권한 검증 → Zod 검증 → DB 작업 순서 필수. 컴포넌트는 Server/Client 역할 명확히 구분. lib/types/index.ts의 편의 타입 활용. npm run validate (type-check + lint + format:check) 통과 필수.",
-      "summary": "layout.tsx에 '내 이벤트'(/protected/events)와 '새 이벤트 만들기'(/protected/events/new) 링크 추가. .prettierignore에 shrimp_data/ 추가. npm run validate(type-check + lint + format:check) 통과. Phase 1 완료 기준 5개 달성: 이벤트 생성→상세+초대코드, 주최/참여 탭, 수정 반영, 취소 상태, 비주최자 redirect.",
-      "completedAt": "2026-02-25T05:53:52.334Z"
+      "implementationGuide": "Bash 도구 실행: npx supabase gen types typescript --project-id $(grep SUPABASE_URL .env.local | sed 's/.*\\/\\///' | cut -d. -f1) > lib/types/database.ts\n실제로는 mcp__supabase__generate_typescript_types 도구를 사용하여 결과를 lib/types/database.ts에 Write.",
+      "verificationCriteria": "lib/types/database.ts의 event_participants Row 타입에 attended: boolean과 rejection_reason: string | null 필드가 포함되어 있는지 확인",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "lib/types/database.ts 재생성 완료. event_participants Row 타입에 attended: boolean, rejection_reason: string | null 필드 포함됨.",
+      "completedAt": "2026-02-27T00:47:15.631Z"
+    },
+    {
+      "id": "67cf8860-2ef7-4c81-a267-1919f3702abb",
+      "name": "schemas.ts: ParticipantWithProfile 타입 업데이트",
+      "description": "app/(protected)/events/schemas.ts의 ParticipantWithProfile 타입에 attended: boolean과 rejection_reason: string | null 필드 추가.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "f17c4261-10e2-4f9c-bfc6-d820816466dc"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:47:28.202Z",
+      "relatedFiles": [
+        {
+          "path": "app/(protected)/events/schemas.ts",
+          "type": "TO_MODIFY",
+          "description": "ParticipantWithProfile 타입에 attended, rejection_reason 추가"
+        }
+      ],
+      "implementationGuide": "ParticipantWithProfile 타입 수정:\n```\nexport type ParticipantWithProfile = {\n  id: string;\n  userId: string;\n  status: ParticipantStatus;\n  joinedAt: string;\n  attended: boolean;\n  rejection_reason: string | null;\n  profile: Pick<Profile, 'id' | 'username' | 'full_name' | 'avatar_url'> | null;\n  email: string | null;\n};\n```",
+      "verificationCriteria": "schemas.ts의 ParticipantWithProfile에 attended: boolean과 rejection_reason: string | null 필드가 추가됨",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "ParticipantWithProfile 타입에 attended: boolean과 rejection_reason: string | null 필드 추가 완료.",
+      "completedAt": "2026-02-27T00:47:28.201Z"
+    },
+    {
+      "id": "5227db60-9a12-4296-ba05-1428e87f0fcf",
+      "name": "actions.ts: 서버 액션 4가지 추가/수정",
+      "description": "1) getParticipantsByEvent에서 attended, rejection_reason 컬럼 조회 포함\n2) toggleAttendance(participantId, eventId, attended) 서버 액션 추가 (host 검증)\n3) rejectParticipant에 reason?: string 파라미터 추가, rejection_reason UPDATE 포함\n4) duplicateEvent(eventId) 서버 액션 추가 (원본 조회, invite_code 신규 생성, INSERT)\n5) getAllEvents에 options?: { search?: string; status?: EventStatus } 파라미터 추가",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "67cf8860-2ef7-4c81-a267-1919f3702abb"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:48:14.112Z",
+      "relatedFiles": [
+        {
+          "path": "app/(protected)/events/actions.ts",
+          "type": "TO_MODIFY",
+          "description": "getParticipantsByEvent 쿼리 확장, toggleAttendance 추가, rejectParticipant reason 추가, getAllEvents 필터 추가"
+        },
+        {
+          "path": "app/(protected)/events/schemas.ts",
+          "type": "REFERENCE",
+          "description": "ParticipantWithProfile 타입 참조"
+        }
+      ],
+      "implementationGuide": "1) getParticipantsByEvent select 쿼리: 'id, user_id, status, joined_at, attended, rejection_reason'\n   result 매핑에 attended: p.attended, rejection_reason: p.rejection_reason 추가\n\n2) toggleAttendance 서버 액션 추가:\n   - getClaims로 userId 확인\n   - events 테이블에서 host_id 검증\n   - event_participants UPDATE { attended: attended } WHERE id = participantId\n   - revalidatePath('/events/[eventId]/manage')\n   - return { success: true } | { error: string }\n\n3) rejectParticipant 시그니처 변경:\n   async function rejectParticipant(participantId, eventId, reason?: string)\n   UPDATE 시 { status: 'rejected', rejection_reason: reason ?? null }\n\n4) duplicateEvent 서버 액션 추가:\n   - getClaims로 userId 확인\n   - events 테이블에서 원본 이벤트 조회 (title, description, location, max_capacity, join_policy)\n   - 신규 invite_code 생성\n   - INSERT로 신규 이벤트 생성 (event_date는 null/빈값이므로 스킵 or 현재시간 사용)\n   - redirect('/events/new?from=[newEventId]') 대신 실제 구현은 return { data: { id } } 또는 direct redirect\n   - 로드맵에서 '클릭 시 /events/new?from=[id]로 이동' 명시 → 버튼에서 Link로 처리하므로 액션 불필요, 대신 new/page.tsx에서 getEventById 사용\n\n5) getAllEvents 수정:\n   options?: { search?: string; status?: EventStatus }\n   let query = supabase.from('events').select('*')\n   if (options?.status) { query = query.eq('status', options.status) } else { query = query.eq('status', 'active') }\n   if (options?.search) { query = query.ilike('title', '%' + options.search + '%') }\n   query = query.order('event_date', { ascending: true })",
+      "verificationCriteria": "1) getParticipantsByEvent가 attended, rejection_reason 반환\n2) toggleAttendance 함수 존재, host 검증 포함\n3) rejectParticipant가 reason 파라미터 받아 DB UPDATE\n4) getAllEvents가 search/status 필터 적용",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "actions.ts 수정 완료: getAllEvents 필터 옵션 추가, getParticipantsByEvent attended/rejection_reason 조회 추가, rejectParticipant reason 파라미터 추가, toggleAttendance 서버 액션 추가.",
+      "completedAt": "2026-02-27T00:48:14.109Z"
+    },
+    {
+      "id": "2d968afa-899d-4e29-a506-c092d4d083f1",
+      "name": "components/events/reject-dialog.tsx 신규 생성",
+      "description": "거절 사유 입력 AlertDialog 컴포넌트 생성. AlertDialog 기반, '거절 사유 (선택)' Textarea 포함, 확인 시 rejectParticipant(id, eventId, reason) 호출.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "5227db60-9a12-4296-ba05-1428e87f0fcf"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:48:36.332Z",
+      "relatedFiles": [
+        {
+          "path": "components/events/reject-dialog.tsx",
+          "type": "CREATE",
+          "description": "거절 사유 입력 AlertDialog 컴포넌트"
+        },
+        {
+          "path": "components/ui/alert-dialog.tsx",
+          "type": "DEPENDENCY",
+          "description": "shadcn/ui AlertDialog"
+        },
+        {
+          "path": "lib/hooks/use-action-toast.ts",
+          "type": "DEPENDENCY",
+          "description": "toast 훅 재사용"
+        }
+      ],
+      "implementationGuide": "'use client'\nimport { useState } from 'react'\nimport { rejectParticipant } from '@/app/(protected)/events/actions'\nimport { useActionToast } from '@/lib/hooks/use-action-toast'\nimport { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'\nimport { Textarea } from '@/components/ui/textarea'\nimport { Button } from '@/components/ui/button'\nimport { Label } from '@/components/ui/label'\n\ninterface RejectDialogProps {\n  participantId: string;\n  eventId: string;\n  disabled?: boolean;\n  onSuccess?: () => void;\n}\n\nexport function RejectDialog({ participantId, eventId, disabled, onSuccess }: RejectDialogProps) {\n  const [reason, setReason] = useState('')\n  const [isLoading, setIsLoading] = useState(false)\n  const { handleResult } = useActionToast()\n\n  const handleConfirm = async () => {\n    setIsLoading(true)\n    const result = await rejectParticipant(participantId, eventId, reason || undefined)\n    setIsLoading(false)\n    handleResult(result, '거절 처리되었습니다.')\n    if ('success' in result) { setReason(''); onSuccess?.() }\n  }\n\n  return (\n    <AlertDialog>\n      <AlertDialogTrigger asChild>\n        <Button size='sm' variant='outline' disabled={disabled}>거절</Button>\n      </AlertDialogTrigger>\n      <AlertDialogContent>\n        <AlertDialogHeader>\n          <AlertDialogTitle>참여 신청 거절</AlertDialogTitle>\n          <AlertDialogDescription>거절 사유를 입력하면 참여자에게 표시됩니다.</AlertDialogDescription>\n        </AlertDialogHeader>\n        <div className='space-y-1.5'>\n          <Label htmlFor='reason'>거절 사유 (선택)</Label>\n          <Textarea id='reason' placeholder='거절 사유를 입력하세요 (선택)' value={reason} onChange={e => setReason(e.target.value)} rows={3} />\n        </div>\n        <AlertDialogFooter>\n          <AlertDialogCancel>취소</AlertDialogCancel>\n          <AlertDialogAction onClick={handleConfirm} disabled={isLoading} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>\n            {isLoading ? '처리 중...' : '거절'}\n          </AlertDialogAction>\n        </AlertDialogFooter>\n      </AlertDialogContent>\n    </AlertDialog>\n  )\n}",
+      "verificationCriteria": "RejectDialog 컴포넌트가 정상 렌더링되며, Textarea에 사유 입력 후 확인 시 rejectParticipant 호출됨",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "RejectDialog 컴포넌트 생성 완료. AlertDialog + Textarea 기반, rejectParticipant 호출 및 useActionToast 적용.",
+      "completedAt": "2026-02-27T00:48:36.324Z"
+    },
+    {
+      "id": "27252af5-8130-47cd-97e2-1b7f401871bc",
+      "name": "ParticipantList 컴포넌트 수정: 출석 체크 + RejectDialog + rejection_reason 표시",
+      "description": "1) showAttendance?: boolean prop 추가, approved 목록 각 행에 Checkbox 표시 및 toggleAttendance 연결\n2) 거절 버튼을 RejectDialog로 교체\n3) rejected 목록에서 rejection_reason 있으면 이름 아래 표시",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "2d968afa-899d-4e29-a506-c092d4d083f1"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:49:02.850Z",
+      "relatedFiles": [
+        {
+          "path": "components/events/participant-list.tsx",
+          "type": "TO_MODIFY",
+          "description": "showAttendance prop, RejectDialog 교체, rejection_reason 표시"
+        },
+        {
+          "path": "components/events/reject-dialog.tsx",
+          "type": "DEPENDENCY",
+          "description": "RejectDialog 컴포넌트"
+        },
+        {
+          "path": "components/ui/checkbox.tsx",
+          "type": "DEPENDENCY",
+          "description": "Checkbox 컴포넌트"
+        }
+      ],
+      "implementationGuide": "import { Checkbox } from '@/components/ui/checkbox'\nimport { toggleAttendance } from '@/app/(protected)/events/actions'\nimport { RejectDialog } from './reject-dialog'\n\ninterface ParticipantListProps {\n  participants: ParticipantWithProfile[];\n  eventId: string;\n  showActions?: boolean;\n  showAttendance?: boolean;\n}\n\n출석 체크:\n- showAttendance && participant.status === 'approved' 조건으로 Checkbox 렌더\n- onChange: setLoading(id, true) → toggleAttendance(id, eventId, !participant.attended) → setLoading(id, false) → router.refresh()\n- attended 상태는 서버에서 받은 participant.attended 기준\n\n거절 버튼 교체:\n기존: <Button size='sm' variant='outline' onClick={() => handleReject(participant.id)}>거절</Button>\n교체: <RejectDialog participantId={participant.id} eventId={eventId} disabled={isLoading} onSuccess={() => router.refresh()} />\n- handleReject 함수 제거 (RejectDialog 내부에서 처리)\n\nrejection_reason 표시:\nparticipant.status === 'rejected' && participant.rejection_reason && (\n  <p className='mt-0.5 text-xs text-muted-foreground'>거절 사유: {participant.rejection_reason}</p>\n)",
+      "verificationCriteria": "1) showAttendance={true}일 때 approved 참여자 행에 Checkbox 렌더링\n2) 거절 버튼이 RejectDialog로 교체됨\n3) rejected 참여자에 rejection_reason 표시",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "ParticipantList 수정 완료. showAttendance prop+출석 Checkbox, 거절 버튼→RejectDialog 교체, rejection_reason 표시 추가.",
+      "completedAt": "2026-02-27T00:49:02.841Z"
+    },
+    {
+      "id": "0fb9802e-b41b-4d96-9299-012f02473056",
+      "name": "manage/page.tsx: showAttendance prop 전달",
+      "description": "app/(protected)/events/[id]/manage/page.tsx의 approved 탭 ParticipantList에 showAttendance={true} prop 전달.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "27252af5-8130-47cd-97e2-1b7f401871bc"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:49:14.520Z",
+      "relatedFiles": [
+        {
+          "path": "app/(protected)/events/[id]/manage/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "approved 탭 ParticipantList에 showAttendance={true} 추가"
+        }
+      ],
+      "implementationGuide": "TabsContent value='approved'의 ParticipantList에 showAttendance={true} 추가:\n<ParticipantList participants={approvedList} eventId={id} showAttendance={true} />",
+      "verificationCriteria": "승인됨 탭의 ParticipantList에 showAttendance={true}가 전달되어 Checkbox 렌더링됨",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "manage/page.tsx approved 탭 ParticipantList에 showAttendance={true} 전달 완료.",
+      "completedAt": "2026-02-27T00:49:14.515Z"
+    },
+    {
+      "id": "eb4d8ea6-bddd-4ee4-8ad0-8a8b8e9eee0a",
+      "name": "events/new/page.tsx: ?from= prefill 지원",
+      "description": "searchParams.from이 있으면 getEventById로 원본 이벤트 조회 후 EventForm defaultValues로 전달. event_date, event_time, cover_image_url 제외.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "5227db60-9a12-4296-ba05-1428e87f0fcf"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:49:38.063Z",
+      "relatedFiles": [
+        {
+          "path": "app/(protected)/events/new/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "searchParams.from으로 기존 이벤트 prefill"
+        },
+        {
+          "path": "app/(protected)/events/actions.ts",
+          "type": "DEPENDENCY",
+          "description": "getEventById 재사용"
+        }
+      ],
+      "implementationGuide": "NewEventContent를 async 함수로 유지.\nsearchParams prop 추가: interface NewEventPageProps { searchParams: Promise<{ from?: string }> }\n\nconst { from } = await searchParams\nlet defaultValues: Partial<EventFormValues> | undefined = undefined\nif (from) {\n  const result = await getEventById(from)\n  if (!('error' in result)) {\n    const { event } = result\n    defaultValues = {\n      title: event.title,\n      description: event.description ?? undefined,\n      location: event.location ?? undefined,\n      max_capacity: event.max_capacity ?? undefined,\n      join_policy: event.join_policy,\n    }\n  }\n}\n\n<EventForm action={createEvent} submitLabel='이벤트 만들기' userId={userId} defaultValues={defaultValues} />",
+      "verificationCriteria": "?from=[eventId] 파라미터로 접속 시 이벤트 제목/설명/장소/최대인원/참여방식이 폼에 prefill됨. 날짜/시간/이미지는 빈값.",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "new/page.tsx에 searchParams.from 처리 추가. getEventById로 원본 조회 후 title/description/location/max_capacity/join_policy prefill. 날짜/이미지는 제외.",
+      "completedAt": "2026-02-27T00:49:38.051Z"
+    },
+    {
+      "id": "edfdf70b-d3bd-4de4-80b2-cd48b99547e5",
+      "name": "events/[id]/page.tsx: 이벤트 복제 버튼 추가",
+      "description": "이벤트 상세 페이지 주최자 액션 영역에 '이 이벤트 복제' 버튼 추가. 클릭 시 /events/new?from=[id]로 이동.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "eb4d8ea6-bddd-4ee4-8ad0-8a8b8e9eee0a"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:49:54.146Z",
+      "relatedFiles": [
+        {
+          "path": "app/(protected)/events/[id]/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "복제 버튼 추가"
+        }
+      ],
+      "implementationGuide": "role === 'host' && event.status === 'active' 조건 블록 내 버튼 영역에 추가:\n<Button variant='outline' asChild>\n  <Link href={`/events/new?from=${event.id}`}>복제</Link>\n</Button>\n기존 버튼들(참여자 관리, 수정, 이벤트 취소) 사이에 삽입.",
+      "verificationCriteria": "주최자가 이벤트 상세 페이지에서 '복제' 버튼을 볼 수 있고, 클릭 시 /events/new?from=[id]로 이동함",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "이벤트 상세 페이지 주최자 액션 영역에 '복제' 버튼 추가. /events/new?from=[id]로 이동.",
+      "completedAt": "2026-02-27T00:49:54.131Z"
+    },
+    {
+      "id": "0ef06bba-f39d-49a1-b9d1-a102675f19e0",
+      "name": "components/events/event-filter.tsx 신규 생성",
+      "description": "이벤트 목록 필터/검색 클라이언트 컴포넌트. 검색어 Input + 상태 Select로 구성. onChange 시 useRouter로 URL searchParams 업데이트.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "5227db60-9a12-4296-ba05-1428e87f0fcf"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:50:12.586Z",
+      "relatedFiles": [
+        {
+          "path": "components/events/event-filter.tsx",
+          "type": "CREATE",
+          "description": "이벤트 목록 필터/검색 클라이언트 컴포넌트"
+        }
+      ],
+      "implementationGuide": "'use client'\nimport { useRouter, useSearchParams } from 'next/navigation'\nimport { useCallback } from 'react'\nimport { Input } from '@/components/ui/input'\nimport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'\n\nconst STATUS_OPTIONS = [\n  { value: 'all', label: '전체 상태' },\n  { value: 'active', label: '진행 중' },\n  { value: 'cancelled', label: '취소됨' },\n  { value: 'completed', label: '완료' },\n]\n\nexport function EventFilter() {\n  const router = useRouter()\n  const searchParams = useSearchParams()\n\n  const updateParams = useCallback((key: string, value: string) => {\n    const params = new URLSearchParams(searchParams.toString())\n    if (value && value !== 'all') { params.set(key, value) } else { params.delete(key) }\n    router.push(`/events?${params.toString()}`)\n  }, [router, searchParams])\n\n  return (\n    <div className='flex gap-2'>\n      <Input\n        placeholder='이벤트 검색...'\n        defaultValue={searchParams.get('search') ?? ''}\n        onChange={e => updateParams('search', e.target.value)}\n        className='max-w-xs'\n      />\n      <Select\n        defaultValue={searchParams.get('status') ?? 'all'}\n        onValueChange={value => updateParams('status', value)}\n      >\n        <SelectTrigger className='w-32'>\n          <SelectValue />\n        </SelectTrigger>\n        <SelectContent>\n          {STATUS_OPTIONS.map(opt => (\n            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>\n          ))}\n        </SelectContent>\n      </Select>\n    </div>\n  )\n}\n\nSelect 컴포넌트 설치 필요: npx shadcn@latest add select",
+      "verificationCriteria": "EventFilter 컴포넌트가 렌더링되며 검색어 입력/상태 선택 시 URL searchParams 업데이트됨",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "EventFilter 컴포넌트 생성 완료. Input+Select 기반 검색/상태 필터, URL searchParams 업데이트.",
+      "completedAt": "2026-02-27T00:50:12.572Z"
+    },
+    {
+      "id": "f373ac3e-add4-4988-8020-b3d28a331af1",
+      "name": "events/page.tsx: searchParams 기반 필터 전달 및 EventFilter 삽입",
+      "description": "이벤트 목록 페이지에 searchParams prop 추가, EventFilter 컴포넌트 삽입, 전체 이벤트 탭에 필터 파라미터 전달.",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "0ef06bba-f39d-49a1-b9d1-a102675f19e0"
+        }
+      ],
+      "createdAt": "2026-02-27T00:45:45.969Z",
+      "updatedAt": "2026-02-27T00:51:02.984Z",
+      "relatedFiles": [
+        {
+          "path": "app/(protected)/events/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "searchParams 기반 필터 전달, EventFilter 삽입"
+        },
+        {
+          "path": "components/events/event-filter.tsx",
+          "type": "DEPENDENCY",
+          "description": "EventFilter 컴포넌트"
+        }
+      ],
+      "implementationGuide": "EventsPage에 searchParams prop 추가:\ninterface EventsPageProps { searchParams: Promise<{ search?: string; status?: string }> }\n\nEventsContent에서 searchParams 받아 getAllEvents에 전달:\nconst { search, status } = await searchParams\nconst allResult = await getAllEvents({\n  search: search || undefined,\n  status: status as EventStatus || undefined,\n})\n\n전체 이벤트 탭 상단에 EventFilter 삽입 (Suspense로 감쌈):\n<TabsContent value='all' className='mt-4'>\n  <Suspense><EventFilter /></Suspense>\n  {allEvents.length === 0 ? ... : <div className='grid gap-3 sm:grid-cols-2'>...}}\n</TabsContent>\n\n단, EventsPage는 현재 searchParams prop이 없으므로 추가 필요.\nEventsContent에 searchParams 전달.",
+      "verificationCriteria": "전체 이벤트 탭에서 검색어/상태 필터 적용 후 결과 즉시 반영됨. npm run validate 통과.",
+      "analysisResult": "Phase 3 신규 기능 추가. 서버 액션(actions.ts), 스키마(schemas.ts), 컴포넌트로 책임 분리. shadcn/ui 컴포넌트 재사용, useActionToast 훅 재사용. DB migration(attended+rejection_reason)을 선행 후 타입 재생성, 이후 코드 변경 진행.",
+      "summary": "events/page.tsx에 searchParams 기반 필터 전달 및 EventFilter 삽입 완료. npm run validate 통과.",
+      "completedAt": "2026-02-27T00:51:02.972Z"
     }
   ]
 }
